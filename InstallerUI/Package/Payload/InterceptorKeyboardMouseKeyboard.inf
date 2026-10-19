@@ -1,0 +1,38 @@
+[Version]
+Signature="$WINDOWS NT$"
+Class=Keyboard
+ClassGuid={4D36E96B-E325-11CE-BFC1-08002BE10318}
+Provider=%Provider%
+CatalogFile=InterceptorKeyboardMouseKeyboard.cat
+DriverVer=10/19/2026,1.0.0.0
+PnpLockdown=1
+[Manufacturer]
+%Provider%=Models,NTamd64.10.0...16299
+[Models.NTamd64.10.0...16299]
+%Name%=Mapper,HID_DEVICE_SYSTEM_KEYBOARD
+[Mapper.NT]
+CopyFiles=Files
+[Mapper.NT.Services]
+AddService=InterceptorKeyboardMouse,2,Service
+[Service]
+DisplayName=%ServiceName%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%13%\InterceptorKeyboardMouse.sys
+[Mapper.NT.Wdf]
+KmdfService=InterceptorKeyboardMouse,Wdf
+[Wdf]
+KmdfLibraryVersion=1.15
+[DestinationDirs]
+Files=13
+[Files]
+InterceptorKeyboardMouse.sys
+[SourceDisksNames]
+1=%Provider%,,,
+[SourceDisksFiles]
+InterceptorKeyboardMouse.sys=1
+[Strings]
+Provider="TitanCSA Keyboard Mouse"
+Name="InterceptorKeyboardMouse HID Keyboard Mapper"
+ServiceName="InterceptorKeyboardMouse"
