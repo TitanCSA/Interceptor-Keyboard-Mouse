@@ -22,7 +22,8 @@ Screenshots illustrate the interface; preview inputs are simulated.
 1. Download this repository's **InterceptorSetup.exe** and accept elevation.
 2. Choose **Install / reinstall**. Use Windows **Restart** if requested, then
    reopen setup to finish device associations.
-3. Run **InterceptorExampleUI.exe** as administrator and click **Observe**.
+3. Run **InterceptorExampleUI.exe** and accept the administrator prompt.
+   Observation starts automatically; tabs select keyboard or mouse.
    **Stop** releases capture. Close other capture applications first.
 4. Use **Diagnose** for installation checks and a report you can copy or export.
    Input features that were not exercised remain **unverified**.
