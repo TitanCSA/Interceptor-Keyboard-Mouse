@@ -1,104 +1,113 @@
-# Interceptor Keyboard & Mouse — Windows Kernel Filter Driver
+# Interceptor Keyboard & Mouse - Windows Kernel Filter Driver
 
-**Microsoft-signed Windows kernel-mode input filter driver for keyboard and mouse,
-with a two-file C++17 SDK.**
+Capture, remap or block **physical keyboard and mouse input** with a
+**Microsoft-signed kernel filter driver** and a **two-file C++17 SDK**.
+Identify each source, receive its input and forward your changes through the
+device's Windows input path. Requires **Windows 10 1709+ / Windows 11 x64**.
 
-Receive physical input, identify its source, read or change it, then forward it
-to Windows through one API. Windows 10 1709+ / Windows 11 **x64**; administrator
-rights are required for installation and capture. Uses Windows keyboard/mouse input paths and supported HID mapper collections; no controller capture or injection APIs.
-See [compatibility](docs/COMPATIBILITY.md) for supported profiles and limits.
-
-**[Download](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest)** · [Installation](docs/INSTALLATION.md)
-· [C++ API](docs/API.md) · [Examples](ExamplesConsole/README.md)
+**[Download](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest)** |
+[Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
+[Examples](ExamplesConsole/README.md) | [Compatibility](docs/COMPATIBILITY.md)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
-| ![Product-specific installer](docs/images/installer.png) | ![Input viewer with simulated input](docs/images/viewer.png) |
+| ![Installer dashboard](docs/images/installer.png) | ![Viewer with simulated input](docs/images/viewer.png) |
 
-Images illustrate the interface; the viewer uses simulated input and is not a
-physical-device compatibility test. See release notes for validation details.
+Screenshots illustrate the interface; preview inputs are simulated.
 
-## Quick start
+<a id="quick-start"></a>
 
-1. Download this edition's **InterceptorSetup.exe**, run it and accept elevation.
-2. Click **Install / reinstall**. If requested, use Windows **Restart**, then
-   reopen the same installer to finish device associations.
+## Install and use
+
+1. Download this repository's **InterceptorSetup.exe** and accept elevation.
+2. Choose **Install / reinstall**. Use Windows **Restart** if requested, then
+   reopen setup to finish device associations.
 3. Run **InterceptorExampleUI.exe** as administrator and click **Observe**.
    **Stop** releases capture. Close other capture applications first.
-4. Use **Diagnose** for per-device installation/API checks and copyable reports.
-   Input features that cannot be exercised automatically remain **unverified**.
+4. Use **Diagnose** for installation checks and a report you can copy or export.
+   Input features that were not exercised remain **unverified**.
 
-The console installer uses the same installation engine:
+The GUI provides **Uninstall**. The console installer uses the same setup engine:
 
 ```powershell
 .\InterceptorSetupConsole.exe /install
 .\InterceptorSetupConsole.exe /uninstall
 ```
 
-Exit code `3010` means a restart is required; after installing, rerun `/install`
-after that restart. The Microsoft signature covers the driver package, not the
-installer or example EXEs. [Installation and recovery](docs/INSTALLATION.md).
+Exit code `3010` requests a restart; rerun `/install` afterward if associations
+are pending. The driver package is Microsoft-signed; that signature does not
+automatically sign installer or example EXEs. [Recovery](docs/INSTALLATION.md).
 
-## Separate editions
+## How it works
 
-This repository handles **keyboard and mouse input only**. The companion
-[Interceptor-Gamepad-Controller](https://github.com/TitanCSA/Interceptor-Gamepad-Controller) handles the other input families.
-The two editions have separate driver services, device associations, recovery
-state and demo allowances, and can run side by side. Each application must use
-the SDK for its installed edition. Do not link both alternative SDKs together.
+The driver uses supported Windows keyboard/mouse paths and HID mapper collections.
+Input passes through normally until an application captures it. The application
+receives scan codes, press/release flags, mouse movement, buttons and wheel data;
+it can modify them, forward them or deliberately block individual events.
+Closing the application releases capture. Physical **Ctrl+Alt+Delete** revokes
+captures. Device/report limits are described in [compatibility](docs/COMPATIBILITY.md).
 
-The original [Interceptor](https://github.com/TitanCSA/Interceptor) combines both
-groups. Remove an overlapping original Interceptor installation before using a
-split edition; the installers refuse conflicting filter stacking and do not
-uninstall another product automatically.
+This edition provides **keyboard and mouse input only**. The separate
+[Gamepad & Controller edition](https://github.com/TitanCSA/Interceptor-Gamepad-Controller)
+can run alongside it, using its own service, SDK, recovery state and demo allowance.
+Remove an overlapping combined [Interceptor](https://github.com/TitanCSA/Interceptor)
+installation first. Use each edition's own SDK in its applications.
 
-## Two-hour demo
+## C++ SDK and examples
 
-**Two hours per Windows boot**, starting with the first successful capture,
-shared by all applications using this edition. Sleep time counts. Closing an
-application, uninstalling or reinstalling does not reset the current allowance.
-Diagnostics that create a capture can start it.
+Add [`Interceptor.h`](Interceptor/Interceptor.h) and
+[`Interceptor.cpp`](Interceptor/Interceptor.cpp) to your Windows x64 C++17 project.
+Compile the source once and include the header; no SDK DLL or prebuilt LIB is
+required. Run capture applications as administrator.
 
-At expiry, captures are revoked, new capture/injection is refused, and physical
-input continues normally. Use Windows **Restart** for another allowance; Fast
-Startup shutdown does not reset the kernel boot. For the **full version without
-the demo time limit**, DM **`titancsa`** on Discord.
+The library manages the capture session automatically. Receive a batch with
+`Get_Input_With_Timeout()`, read or change its typed entries, and forward it with
+`Send_Input(inputs)`. Types, destinations and counts are automatic. Forward
+unchanged events too: receiving removes them from the input queue.
 
-## Downloads and source
+Six complete [console examples](ExamplesConsole/README.md) demonstrate key swaps,
+typing, mouse-axis changes and deliberate input blocking. The graphical viewer
+shows the same input families. [Complete API guide](docs/API.md).
 
-All binaries and checksums are in [Releases](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest).
+<a id="downloads-and-source"></a>
 
-| File | Contents |
-| --- | --- |
-| `InterceptorSetup.exe` | Standalone graphical installer and diagnostics |
-| `InterceptorSetupConsole.exe` | Standalone `/install` and `/uninstall` installer |
-| `InterceptorExampleUI.exe` | Standalone input viewer |
-| `Interceptor-Keyboard-Mouse-Examples-1.0.0.0.zip` | Console examples and viewer |
-| `Interceptor-Keyboard-Mouse-SDK-1.0.0.0.zip` | Two-file SDK and example source |
+## Downloads and build
+
+The [latest release](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest)
+contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
+**InterceptorExampleUI.exe**, examples and source SDK ZIPs, and **SHA256SUMS.txt**.
 
 ```text
-Interceptor/       Interceptor.h + Interceptor.cpp; no SDK DLL required
-ExamplesConsole/   Six complete keyboard/mouse C++ examples
-ExamplesUI/        Graphical viewer for this edition's input families
+Interceptor/       The two-file C++ library
+ExamplesConsole/   Six keyboard/mouse examples
+ExamplesUI/        Graphical input viewer
 InstallerConsole/  Console installer
-InstallerUI/       UI, shared installation engine and precompiled driver/recovery
-docs/              API, installation, compatibility and images
-licenses/          Driver binary terms and attribution
+InstallerUI/       GUI, setup engine and compiled driver/recovery binaries
+docs/ licenses/    Guides, screenshots and license terms
 ```
 
-With Visual Studio 2022 C++ tools, a Windows SDK and CMake installed, run
-`powershell -ExecutionPolicy Bypass -File .\Build.ps1` to build the user-mode
-applications. Builds embed the supplied signed driver and precompiled recovery
-binaries. **Kernel source and private signing material are not included.**
-[Build instructions](docs/BUILD.md). User-mode source is [MIT](LICENSE); the
-demo driver has [separate terms](licenses/BINARY-LICENSE.txt).
+Build user-mode applications with Visual Studio 2022 C++ tools, a Windows SDK and
+CMake: `powershell -ExecutionPolicy Bypass -File .\Build.ps1`.
+Builds use the supplied signed driver and compiled recovery binaries.
+**Kernel source is not included.** [Build guide](docs/BUILD.md).
+User-mode source is [MIT](LICENSE); driver binaries have
+[separate terms](licenses/BINARY-LICENSE.txt).
 
-This independent project evolves the input-interception workflow popularized by
-[oblitum's Interception](https://github.com/oblitum/Interception), with its own
+<a id="two-hour-demo"></a>
+
+## Demo edition
+
+**Two hours per Windows kernel boot**, starting with the first successful capture
+and shared across this edition's applications. Sleep counts; closing, uninstalling
+or reinstalling does not reset the allowance. Capture diagnostics can start it.
+At expiry, capture/injection stop and physical input passes through normally.
+Use Windows **Restart** for another allowance; Fast Startup shutdown does not
+reset the kernel boot. For the unrestricted version, DM **`titancsa`** on Discord.
+
+This independent project evolves the workflow popularized by
+[oblitum/Interception](https://github.com/oblitum/Interception), with its own
 implementation and API. It is not affiliated with oblitum or ABI-compatible with
-the original. See [attribution](licenses/NOTICE). For a bug report, include the
-release, Windows build, VID/PID, connection type and a diagnostic report with
-personal identifiers removed.
+the original. [Attribution](licenses/NOTICE).
 
 ## Minimal example: receive, read, forward
 
