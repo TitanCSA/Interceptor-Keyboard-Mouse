@@ -31,6 +31,7 @@ function New-InstallerPackage([string]$IntermediateDirectory,[string]$NativeDire
     $sourcePayload=Join-Path $source 'Payload'
     $sourceRecovery=Join-Path $source 'Recovery'
     $driverNames=@('InterceptorKeyboardMouse.sys','InterceptorKeyboardMouseKeyboard.inf','InterceptorKeyboardMouseMouse.inf','InterceptorKeyboardMouseControl.inf','interceptorkeyboardmousekeyboard.cat','interceptorkeyboardmousemouse.cat','interceptorkeyboardmousecontrol.cat','Signing.json')
+    if(@(Get-ChildItem -LiteralPath $sourcePayload -Filter '*Control.inf' | Where-Object {[IO.File]::ReadAllText($_.FullName).Contains('TitanDemoClock.sys')}).Count){$driverNames+='TitanDemoClock.sys'}
     $recoveryNames=@('InterceptorRecovery.exe','RecoveryBinding.dll')
     $engineNames=@('Install.ps1','Uninstall.ps1','Associate.ps1','CompleteAssociation.ps1','Common.ps1','Lifecycle.ps1','Maintenance.ps1','EmergencyRecover.ps1','FinalizeUninstall.ps1')
     $driverManifest=Get-Content -LiteralPath (Join-Path $sourcePayload 'SHA256.json') -Raw|ConvertFrom-Json

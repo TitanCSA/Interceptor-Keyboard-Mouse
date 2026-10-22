@@ -1,15 +1,14 @@
 {
-  "Name": "Interceptor-Keyboard-Mouse",
-  "DisplayName": "Interceptor Keyboard & Mouse",
-  "Service": "InterceptorKeyboardMouse",
-  "DriverFile": "InterceptorKeyboardMouse.sys",
-  "Version": "1.0.0.0",
-  "InputMask": 3,
-  "ControllerMask": 0,
-  "Packages": [
-    "InterceptorKeyboardMouseKeyboard.inf",
-    "InterceptorKeyboardMouseMouse.inf",
-    "InterceptorKeyboardMouseControl.inf"
-  ]
+    "Name":  "Interceptor-Keyboard-Mouse",
+    "DisplayName":  "Interceptor Keyboard \u0026 Mouse",
+    "Service":  "InterceptorKeyboardMouse",
+    "DriverFile":  "InterceptorKeyboardMouse.sys",
+    "Version":  "1.0.3.0",
+    "InputMask":  3,
+    "ControllerMask":  0,
+    "Packages":  [
+                     "InterceptorKeyboardMouseKeyboard.inf",
+                     "InterceptorKeyboardMouseMouse.inf",
+                     "InterceptorKeyboardMouseControl.inf"
+                 ]
 }
-

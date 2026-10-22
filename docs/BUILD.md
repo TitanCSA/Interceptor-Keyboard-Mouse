@@ -47,8 +47,7 @@ edition and do not link both alternative SDK implementations into one executable
 
 ## Installer regression checks
 
-Bundle and installer version: **1.0.1.0**. The Microsoft-signed kernel and SDK
-remain **1.0.0.0**; the viewer remains **1.0.0.1**.
+Bundle, Microsoft-signed kernel, installers and viewer: **1.0.3.0**; SDK **1.0.0.0**. The package includes the signed resident demo clock.
 
 The console installer build runs `InstallerUI/Tests/InstallerTests.ps1` automatically.
 It exercises the actual shared process runner and mocked installation/uninstallation
