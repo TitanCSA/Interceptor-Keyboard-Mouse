@@ -38,3 +38,37 @@ Use a normal Windows restart after recovery when requested.
 
 Diagnostics and exports can contain PnP instance IDs and controller protocol
 metadata. Remove serial numbers before sharing a report publicly.
+
+## Setup safeguards and logs
+
+Both installers verify the embedded package before changing Windows and serialize
+maintenance across the Interceptor editions. They check authoritative PnP status
+twice before reporting a device as started. A device already disabled before setup
+is preserved and reported as unverified. Restart-required states are distinguished
+from startup failures, with the instance ID, problem code and failed stage in the log.
+
+If an operation fails, rollback restores this product's saved bindings. Driver
+packages and recovery tools remain available while restoration still needs a
+restart. Uninstall completes pending removal after the next normal Windows boot;
+it does not force-remove a package still referenced by a device. Windows commands
+have bounded deadlines. After a timeout, restart Windows before retrying, since a
+device operation may still be settling.
+
+Only this product's associations, packages and recovery state are removed.
+Keyboard/Mouse and Gamepad/Controller can coexist; the combined Interceptor edition
+must be removed before installing either split edition, and vice versa.
+
+| Exit code | Action |
+| --- | --- |
+| `0` | Completed |
+| `3010` | Restart Windows, then reopen setup if installation is pending |
+| `1618` | Another setup/recovery operation is active; wait and retry |
+| `1638` | Uninstall the conflicting Interceptor edition and restart |
+| `1460` | A Windows command timed out; keep recovery files and restart before retrying |
+| Other nonzero | Inspect the exact failing stage and numeric error in the log |
+
+The output includes the full transcript path under this edition's
+`%ProgramData%` directory. `state.json` records the current maintenance phase;
+`setup-devices.json` records bounded PnP verification history. The GUI can export
+diagnostics. Normal installation and uninstallation never restart Windows
+automatically; restart only when requested.

@@ -1,5 +1,6 @@
 #define IC_SDK_INTERNAL 1
 #include "Interceptor.h"
+#include "SetupHealth.h"
 #include <iostream>
 #include <string>
 #include <system_error>
@@ -30,6 +31,7 @@ int wmain(int argc,wchar_t** argv) {
     using namespace Interceptor;
     try {
         std::wstring mode=argc>1?argv[1]:L"--help";
+        if(mode==L"--setup-state" && argc==2)return SetupHealth::Print(L"ROOT\\InterceptorKeyboardMouse");
         if(mode==L"--install-control" && argc==3)return ConfigureControlDriver(argv[2],false);
         if(mode==L"--remove-control" && argc==2)return ConfigureControlDriver(nullptr,true);
         if(mode==L"--install" && argc==3)return InstallDriver(argv[2],false);

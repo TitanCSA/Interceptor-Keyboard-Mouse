@@ -44,3 +44,25 @@ application; no SDK DLL is needed. Alternatively use `add_subdirectory()` and
 link `Interceptor::SDK`. See [API setup](API.md).
 The two editions use the same namespace; use the library matching your driver
 edition and do not link both alternative SDK implementations into one executable.
+
+## Installer regression checks
+
+Bundle and installer version: **1.0.1.0**. The Microsoft-signed kernel and SDK
+remain **1.0.0.0**; the viewer remains **1.0.0.1**.
+
+The console installer build runs `InstallerUI/Tests/InstallerTests.ps1` automatically.
+It exercises the actual shared process runner and mocked installation/uninstallation
+transactions: immediate exits, concurrent stdout/stderr, argument quoting, bounded
+timeouts, PnP startup states, restart-required rollback and retention of recovery.
+The managed harness compiles the real package wrapper and checks extraction paths,
+callback failures and process lifetime. These tests do not install a driver.
+
+To run them independently:
+
+```powershell
+.\InstallerUI\Tests\InstallerTests.ps1 -ReportDirectory .\obj\InstallerTests
+```
+
+Real installation, reinstall, deferred uninstall and edition coexistence are also
+checked in a dedicated Windows VM. VM and fixture tests do not certify physical
+controller compatibility or measure input latency.

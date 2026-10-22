@@ -41,3 +41,4 @@ $manifest|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $out 'buil
 Write-Host "Console installer: $exe"
 Write-Host 'Built independently from InstallerUI/Package and shared Package.cs; no UI executable is required.'
 Write-Host 'Own-product payload and compiled recovery binaries were verified.'
+& (Join-Path $root 'InstallerUI\Tests\InstallerTests.ps1') -ReportDirectory (Join-Path $build 'Tests')

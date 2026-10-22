@@ -21,15 +21,19 @@ try {
             $driverPath=$driverPath -replace '^\\\?\?\\',''
             if(!$driver -or $driver.State -ne 'Running' -or (Get-FileHash -LiteralPath $driverPath -Algorithm SHA256).Hash -cne $expected){throw 'Le pilote attendu ne fonctionne pas apres redemarrage. Association differee conservee.'}
             $helper=Join-Path $payload 'InterceptorExample.exe'
-            & $helper --status
-            if($LASTEXITCODE){throw 'API du pilote indisponible apres redemarrage.'}
+            if((Invoke-InterceptorSetupHelper $helper @('--status') 20000) -ne 0){throw 'API du pilote indisponible apres redemarrage.'}
             # Include devices first connected after the initial installation
             # in the same protected restoration journal before editing filters.
+            Set-InterceptorPhase 'Resume pending device association'
             $state=Save-InterceptorBaseline
+            $script:InterceptorBeforeSetup=Get-InterceptorSetupState $helper
             # Finish only the deferred input associations. Do not repeat mapper
             # installation or rebind the root control endpoint on every launch.
-            & $helper --init-all --quiet
-            $code=$LASTEXITCODE
+            $code=Invoke-InterceptorSetupHelper $helper @('--init-all','--quiet')
+            if($code -notin @(0,3010)){$state.ControllerAssociation.LastError=$code;Write-InterceptorState $state;throw ('Input initialization failed: '+$code)}
+            Set-InterceptorPhase 'Verify Windows device startup'
+            $code=Wait-InterceptorSetupDevices $helper $script:InterceptorBeforeSetup -RestartRequested:($code -eq 3010)
+            $state=Read-InterceptorState
             $state.ControllerAssociation.Pending=($code -ne 0)
             $state.ControllerAssociation.Boot=$boot
             $state.ControllerAssociation.LastError=if($code -in @(0,3010)){0}else{$code}
@@ -38,6 +42,7 @@ try {
             Write-Host $(if($code -eq 0){'Associations terminees. La capture reste a verifier dans le diagnostic.'}else{'Manettes associees ; Windows demande un dernier redemarrage pour charger leurs filtres.'})
         }
     }
-}catch{Write-Host $_.Exception.Message;$code=1}
-finally{if($logged){Stop-Transcript|Out-Null};Exit-InterceptorOperation}
+    if($logged){Complete-InterceptorOperation $code}
+}catch{$code=if($logged){Write-InterceptorFailure $_}else{Write-Host $_.Exception.ToString();if($script:InterceptorLastExitCode -notin @(0,3010)){$script:InterceptorLastExitCode}else{1}}}
+finally{try{if($logged){Stop-Transcript|Out-Null}}finally{Exit-InterceptorOperation}}
 exit $code

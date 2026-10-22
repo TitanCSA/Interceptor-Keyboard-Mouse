@@ -1,26 +1,37 @@
 $ErrorActionPreference='Stop'
+[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
+$script:InterceptorService='InterceptorKeyboardMouse'
 function Assert-Administrator {
     if(!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Privileges administrateur requis.' }
     if(![Environment]::Is64BitProcess) { throw 'Utiliser Windows PowerShell x64.' }
     if([Environment]::OSVersion.Version.Build -lt 16299) { throw 'Windows 10 version 1709 ou plus recent, ou Windows 11 x64 requis.' }
 }
+function Assert-InterceptorInstallationBoundary {
+    foreach($name in @('Interceptor')){
+        if(Test-Path -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\'+$name)){
+            $script:InterceptorLastExitCode=1638
+            throw ('Incompatible Interceptor edition is still installed or pending removal: '+$name+'. Uninstall that edition and restart Windows before installing this product. Its driver and services were not changed.')
+        }
+    }
+}
 function Add-InterceptorPackage([string]$Path) {
-    if([Environment]::OSVersion.Version.Build -lt 14393) { & pnputil.exe -a $Path }
-    else { & pnputil.exe /add-driver $Path }
-    if($LASTEXITCODE -notin @(0,3010)) { throw "Ajout au magasin en echec: $Path ($LASTEXITCODE)" }
+    $result=Invoke-InterceptorProcess (Get-InterceptorWindowsTool 'pnputil.exe') @('/add-driver',$Path) -TimeoutMs 300000
+    if($result.ExitCode -notin @(0,3010)){throw ('Driver Store add failed: '+$Path+'; exit '+$result.ExitCode)}
+    $script:InterceptorNeedsReboot=$script:InterceptorNeedsReboot -or $result.ExitCode -eq 3010
 }
 function Remove-InterceptorPackage([string]$Name) {
-    # --restore is run first, so the legacy path need not forcibly remove a
-    # still-bound package on Windows 10 1507/1511.
-    if([Environment]::OSVersion.Version.Build -lt 14393) { & pnputil.exe -d $Name|ForEach-Object {Write-Host $_} }
-    else { & pnputil.exe /delete-driver $Name /uninstall|ForEach-Object {Write-Host $_} }
-    if($LASTEXITCODE -notin @(0,3010)) { throw "Suppression du paquet $Name en echec ($LASTEXITCODE). Fermez les clients et redemarrez." }
-    $script:InterceptorNeedsReboot=$script:InterceptorNeedsReboot -or $LASTEXITCODE -eq 3010
+    if($Name -notmatch '^oem[0-9]+\.inf$'){throw 'Invalid owned Driver Store package name.'}
+    $result=Invoke-InterceptorProcess (Get-InterceptorWindowsTool 'pnputil.exe') @('/delete-driver',$Name,'/uninstall') -TimeoutMs 300000
+    if($result.ExitCode -notin @(0,3010)){throw ('Driver Store remove failed: '+$Name+'; exit '+$result.ExitCode)}
+    $script:InterceptorNeedsReboot=$script:InterceptorNeedsReboot -or $result.ExitCode -eq 3010
 }
 function Start-InterceptorLog([string]$Name) {
     $folder=Join-Path $env:ProgramData 'InterceptorKeyboardMouse'
     Initialize-InterceptorStorage
-    Start-Transcript -Path (Join-Path $folder ($Name+'-'+(Get-Date -Format yyyyMMdd-HHmmss)+'.log')) | Out-Null
+    $script:InterceptorOperationLabel=$Name
+    $script:InterceptorLogPath=Join-Path $folder ($Name+'-'+(Get-Date -Format yyyyMMdd-HHmmss)+'-'+[Guid]::NewGuid().ToString('N')+'.log')
+    Start-Transcript -Path $script:InterceptorLogPath|Out-Null
+    Write-Host ('Setup log: '+$script:InterceptorLogPath)
 }
 function Get-InterceptorPackages {
     @(Get-WindowsDriver -Online | Where-Object {
@@ -61,3 +72,9 @@ function Assert-InterceptorPayload([string]$Payload,[switch]$AllowDevelopment) {
     return $mode
 }
 . (Join-Path $PSScriptRoot 'Lifecycle.ps1')
+
+function Invoke-InterceptorSetupHelper([string]$Helper,[string[]]$Arguments,[int]$TimeoutMs=180000) {
+    return [int](Invoke-InterceptorProcess $Helper $Arguments -TimeoutMs $TimeoutMs).ExitCode
+}
+
+. (Join-Path $PSScriptRoot 'Maintenance.ps1')
