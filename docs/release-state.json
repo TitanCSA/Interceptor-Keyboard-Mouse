@@ -1,18 +1,18 @@
 {
     "Schema":  1,
     "Product":  "Interceptor-Keyboard-Mouse",
-    "DriverVersion":  "1.0.3.0",
+    "DriverVersion":  "1.0.4.0",
     "SdkVersion":  "1.0.0.0",
-    "BundleVersion":  "1.0.3.0",
-    "InstallerVersion":  "1.0.3.0",
-    "ViewerVersion":  "1.0.3.0",
+    "BundleVersion":  "1.0.4.0",
+    "InstallerVersion":  "1.0.4.0",
+    "ViewerVersion":  "1.0.4.0",
     "SigningPending":  false,
-    "TrialSeconds":  7200,
+    "TrialSeconds":  3600,
     "TrialStorage":  "Kernel resident per-boot clock",
     "ClockRequired":  true,
     "InstalledFamilies":  [
                               "Keyboard",
                               "Mouse"
                           ],
-    "Note":  "Microsoft-signed primary driver and resident clock; complete current user-mode sources and installers."
+    "Note":  "Microsoft-signed one-hour primary driver and resident clock; complete current user-mode SDK and installers."
 }

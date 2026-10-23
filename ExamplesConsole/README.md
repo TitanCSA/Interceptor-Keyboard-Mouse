@@ -1,6 +1,6 @@
 # Keyboard / mouse C++ examples
 
-Install this product driver first, then run one example as administrator. Each example checks for its own driver service at startup. The library creates its capture automatically. Closing the application releases its context and restores passthrough. The demo lasts two hours from the first successful capture per Windows boot, shared by all applications using this edition.
+Install this product driver first, then run one example as administrator. Each example checks for its own driver service at startup. The library creates its capture automatically. Closing the application releases its context and restores passthrough. The demo lasts one hour from the first successful capture per Windows boot, shared by all applications using this edition.
 
 | Executable | Purpose |
 | --- | --- |

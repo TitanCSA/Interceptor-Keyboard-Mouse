@@ -204,7 +204,7 @@ namespace InterceptorViewer {
      case 7:state.Text="Capture released";detail.Text=header.ResetReason==1?"Ctrl+Alt+Del released the capture. Click Observe to resume.":"A device or the context changed. Click Observe to resume.";break;
       case 8:state.Text="Preparing capture…";detail.Text="Checking sources and waiting up to 30 seconds for availability. You can use the controller now; one click on Observe is enough. Stop cancels the wait.";break;
       case 9:state.Text="Device present; capture not ready yet";detail.Text="Preparation did not finish within 30 seconds. No input was captured. Installer diagnostics identify the cause: reader, profile, metadata, first report or secondary HID view.";break;
-     case 10:state.Text="Two-hour demo expired";detail.Text="All captures have been released. Devices work normally. Restart Windows to begin another two-hour session.";break;
+     case 10:state.Text="One-hour demo expired";detail.Text="All captures have been released. Devices work normally. Restart Windows to begin another one-hour session.";break;
      default:state.Text="Observation interrupted";detail.Text="Windows "+header.Error+" · "+new Win32Exception((int)header.Error).Message;break;
     }
     if(!active)snapshotDevices=new DeviceState[0];Paint();

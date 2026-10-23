@@ -16,7 +16,7 @@ The SDK connects only to this product's own driver endpoint.
 | `Get_Device_Details(device.token)` | Query this source using its capture-scoped string token |
 | `Get_descriptor(device.token)` | Identity and applicable transport/parsed HID metadata |
 | `Get_Report_Descriptor(device.token)` | Raw HID report descriptor where accessible; otherwise an explicit error or non-applicable result |
-| `Get_Trial_Status()` | Read-only two-hour allowance status; does not start it |
+| `Get_Trial_Status()` | Read-only one-hour allowance status; does not start it |
 
 `Get_Context()` and `Get_Devices()` also create the automatic capture when needed;
 the first successful creation starts the trial. `Init_AllDevices()` and
@@ -76,7 +76,7 @@ press/release and extended-key flags in `stroke.flags`. For `Mouse_Input`, use
 
 Tokens identify a source within its current capture; do not persist them as stable
 hardware serial numbers. Details and descriptors can contain instance IDs.
-The first successful capture starts the shared per-edition two-hour demo allowance.
+The first successful capture starts the shared per-edition one-hour demo allowance.
 After revocation, restart your application to capture again if that allowance
 permits it. A normal Windows restart renews the allowance.
 ## Add the two files to your application

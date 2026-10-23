@@ -94,11 +94,11 @@ Builds use the supplied signed driver and compiled recovery binaries.
 User-mode source is [MIT](LICENSE); driver binaries have
 [separate terms](licenses/BINARY-LICENSE.txt).
 
-<a id="two-hour-demo"></a>
+<a id="one-hour-demo"></a>
 
 ## Demo edition
 
-**Two hours per Windows kernel boot**, starting with the first successful capture
+**One hour per Windows kernel boot**, starting with the first successful capture
 and shared across this edition's applications. Sleep counts; closing, uninstalling
 or reinstalling does not reset the allowance. Capture diagnostics can start it.
 At expiry, capture/injection stop and physical input passes through normally.
