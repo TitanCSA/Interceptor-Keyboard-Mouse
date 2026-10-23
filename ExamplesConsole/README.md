@@ -1,46 +1,53 @@
-# Keyboard / mouse C++ examples
+# Interceptor-Keyboard-Mouse console examples
 
-Install this product driver first, then run one example as administrator. Each example checks for its own driver service at startup. The library creates its capture automatically. Closing the application releases its context and restores passthrough. The demo lasts one hour from the first successful capture per Windows boot, shared by all applications using this edition.
+Install this edition with **InterceptorSetup.exe**, restart Windows if requested,
+then run **one** example as administrator. Each program checks the driver before
+starting and explains its action in English. Close its console or press Ctrl+C to
+stop. Physical Ctrl+Alt+Delete is available if an intentional keyboard block
+suppresses shortcuts; that example also exits on Escape.
 
-| Executable | Purpose |
+Each `.cpp` is independent: `Interceptor.h`, `Interceptor.cpp`, and standard/Windows
+headers are all it needs. There is no shared example runner or behavior header.
+
+| Source / executable | What it does |
 | --- | --- |
-| `01_Echange_H_J` | Swap H and J |
-| `02_Ctrl_H_Hello` | Ctrl+H types hello |
-| `03_Inverse_Souris_Y` | Invert relative mouse Y |
-| `05_Clavier_Bloque_Affichage` | Display and block keyboard input |
-| `06_Souris_Bloquee_Affichage` | Display and block mouse input |
-| `08_Clavier_Minimal` | Minimal receive, change and forward loop |
-| `09_Mouse_Move_Horizontal` | Send a signed relative mouse X movement through the driver |
+| [01_Keyboard_Swap_H_J.cpp](01_Keyboard_Swap_H_J.cpp) | Swap H and J, including key presses and releases. |
+| [02_Keyboard_Ctrl_H_Hello.cpp](02_Keyboard_Ctrl_H_Hello.cpp) | Ctrl+H types hello. The shortcut H is consumed; other keys keep working. |
+| [03_Mouse_Invert_Y.cpp](03_Mouse_Invert_Y.cpp) | Invert mouse Y. X, buttons, wheels and other devices stay unchanged. |
+| [05_Keyboard_Block_And_Print.cpp](05_Keyboard_Block_And_Print.cpp) | Print and block keyboard input. Press Escape to stop and restore normal input. |
+| [06_Mouse_Block_And_Print.cpp](06_Mouse_Block_And_Print.cpp) | Print and block mouse input. Keyboard and controller input keep working. |
+| [08_Keyboard_Minimal.cpp](08_Keyboard_Minimal.cpp) | Minimal example: capture inputs, change H to J, then forward them. |
+| [09_Mouse_Move_Horizontal.cpp](09_Mouse_Move_Horizontal.cpp) | Enter relative mouse X counts: 300 moves right, -485 moves left. Enter q to quit. |
 
-Compile with `powershell -File .\Build.ps1 -Target ExamplesConsole` from the project root. Every example uses `Interceptor/Interceptor.h` and `Interceptor/Interceptor.cpp`.
+## Receive, change, forward
 
-## Move the mouse using raw relative X input
-
-Extract the examples ZIP and run `ExamplesConsole/09_Mouse_Move_Horizontal.exe`
-as administrator after installing this edition's driver. When building from
-source, the EXE is in `bin/Native/`. Type `300` and Enter to send X = +300, or
-`-485` and Enter to send X = -485. `0` does nothing. Esc, `q` and Enter, or Ctrl+C
-exits.
-
-The value is sent directly as a relative mouse input through Interceptor:
+The essential mouse Y operation is easy to follow:
 
 ```cpp
-Interceptor::Mouse_Input input{};
-input.device = mouse.id;        // A mouse returned by Get_Devices().
-auto& state = input.stroke;
-state.x = 300;                 // Relative X; Y, buttons and flags remain zero.
-auto result = Interceptor::Send_Input(input);
+auto inputs = Get_Input_With_Timeout(INFINITE);
+for (auto& input : inputs)
+    if (auto* mouse = input.Get<Mouse_Input>())
+        mouse->stroke.y = -mouse->stroke.y;
+auto result = Send_Input(inputs);
 ```
 
-`state` is a local reference to the SDK's `stroke` field. There is no cursor
-position query, absolute coordinate conversion or screen-bound clamping. These
-are raw movement counts, not a guaranteed number of screen pixels: Windows and
-applications apply their own sensitivity/acceleration. The example also checks
-the send result and handles queue backpressure.
+The complete examples also handle absolute coordinates and signed endpoints,
+check initialization/send failures, and forward unrelated fields/families.
+`INFINITE` sleeps until input arrives; there is no polling, countdown, FPS limit,
+per-packet descriptor query or manually managed context. Buffers and capture
+lifetime belong to the library. Process exit closes capture in the driver.
 
-Physical input is forwarded while you enter commands. The console and driver
-share an event-driven loop with no idle busy polling. Run one capture app at a
-time. The installed demo's one-hour allowance still applies; no driver update
-is required. The compiled EXE is distributed inside the examples ZIP.
+Build from the repository root with `./Build.ps1 -Target ExamplesConsole`.
+EXEs are written to `bin/Native/`. Download precompiled programs from the release's
+**examples ZIP**; the **SDK ZIP** includes their complete sources.
 
-[Source](09_Mouse_Move_Horizontal.cpp)
+The demo is limited to **one hour per boot**, shared across applications.
+
+## Raw mouse movement
+
+`09_Mouse_Move_Horizontal` sends `Mouse_Input` with `state.x` equal to the number
+you type. These are relative input counts, not guaranteed screen pixels; sensitivity
+and acceleration are applied by Windows/the game. `state.y`, buttons and flags stay
+zero. The console input handle wakes `Get_Input_With_Timeout` when typing, while
+physical input is forwarded; no forwarding thread, idle polling or cursor-position API
+is needed. Escape or `q` followed by Enter exits.
