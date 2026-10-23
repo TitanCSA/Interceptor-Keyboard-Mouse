@@ -78,9 +78,10 @@ The [latest release](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/rele
 contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
 **InterceptorExampleUI.exe**, examples and source SDK ZIPs, and **SHA256SUMS.txt**.
 
-To move the mouse horizontally, run **09_Mouse_Move_Horizontal.exe** as
-administrator. Enter `300` to move right or `-485` to move left, then press Enter.
-See the [example instructions](ExamplesConsole/README.md#move-the-mouse-by-a-number-of-pixels).
+For raw relative mouse movement, extract the examples ZIP and run
+`ExamplesConsole/09_Mouse_Move_Horizontal.exe` as administrator. Enter `300` or
+`-485`, then press Enter to send that value directly as mouse X input.
+See the [example instructions](ExamplesConsole/README.md#move-the-mouse-using-raw-relative-x-input).
 
 ```text
 Interceptor/       The two-file C++ library
