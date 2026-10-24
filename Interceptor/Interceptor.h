@@ -22,7 +22,7 @@
 #define IC_SDK_SERVICE L"InterceptorKeyboardMouse"
 #define IC_SDK_DOS_DEVICE L"\\\\.\\InterceptorKeyboardMouse"
 
-// Interceptor SDK 1.0.0.0. Compile Interceptor.cpp once alongside your application.
+// Interceptor SDK 1.0.5.0. Compile Interceptor.cpp once alongside your application.
 // This header has no local-header dependencies. Windows x64, C++17.
 
 // ---- Interceptor.h ----
@@ -737,6 +737,11 @@ template<class T> void AssignWire(T& output,const Wire<T>& input) {
     else output=input;
 }
 template<class T> void AssignWire(std::vector<T>& output,const Wire<T>* input,std::size_t count) {
+    if constexpr(!DecodedHid<T>) {
+        // Bulk copy plain wire records without first value-initializing every
+        // newly returned entry. Keep the small single-input path unchanged.
+        if(count>1){output.assign(input,input+count);return;}
+    }
     output.resize(count);for(std::size_t i=0;i<count;++i)AssignWire(output[i],input[i]);
 }
 }
