@@ -5,6 +5,17 @@ Capture, remap or block **physical keyboard and mouse input** with a
 Identify each source, receive its input and forward your changes through the
 device's Windows input path. Requires **Windows 10 1709+ / Windows 11 x64**.
 
+<!-- full-version-contact:start -->
+> [!IMPORTANT]
+> **Get the full version without demo restrictions**
+>
+> **Discord username: `titancsa`**
+>
+> Open Discord, choose **Friends > Add Friend**, enter **`titancsa`**, then send a direct message. Ask for the **full version without the demo time limit**, and mention **Interceptor Keyboard & Mouse**.
+>
+> Tell me whether you need personal use, business integration or OEM redistribution, and ask for pricing and license / activation instructions.
+<!-- full-version-contact:end -->
+
 **[Download](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest)** |
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
 [Examples](ExamplesConsole/README.md) | [Compatibility](docs/COMPATIBILITY.md)
