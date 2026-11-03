@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="256" height="256" role="img" aria-labelledby="title">
+  <title id="title">Interceptor Keyboard and Mouse</title>
+  <rect x="2" y="2" width="124" height="124" rx="26" fill="#0f172a"/>
+  <rect x="12" y="53" width="72" height="44" rx="7" fill="#1e293b" stroke="#e2e8f0" stroke-width="3"/>
+  <g fill="#e2e8f0">
+    <rect x="21" y="63" width="8" height="7" rx="1.5"/>
+    <rect x="34" y="63" width="8" height="7" rx="1.5"/>
+    <rect x="47" y="63" width="8" height="7" rx="1.5"/>
+    <rect x="60" y="63" width="14" height="7" rx="1.5"/>
+    <rect x="21" y="75" width="8" height="7" rx="1.5"/>
+    <rect x="34" y="75" width="8" height="7" rx="1.5"/>
+    <rect x="47" y="75" width="8" height="7" rx="1.5"/>
+    <rect x="60" y="75" width="14" height="7" rx="1.5"/>
+    <rect x="31" y="87" width="33" height="4" rx="2"/>
+  </g>
+  <rect x="21" y="63" width="8" height="7" rx="1.5" fill="#38bdf8"/>
+  <rect x="91" y="32" width="25" height="59" rx="12.5" fill="#1e293b" stroke="#e2e8f0" stroke-width="3"/>
+  <path d="M103.5 32v22M92 56h23" fill="none" stroke="#e2e8f0" stroke-width="2.5"/>
+  <rect x="101" y="41" width="5" height="10" rx="2.5" fill="#38bdf8"/>
+</svg>
