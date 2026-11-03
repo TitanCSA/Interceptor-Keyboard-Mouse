@@ -52,6 +52,11 @@ automatically sign installer or example EXEs. [Recovery](docs/INSTALLATION.md).
 
 ## How it works
 
+For a spare keyboard used as a macro pad, see [selecting one keyboard](docs/SELECTED-KEYBOARD.md).
+Before installing a capture driver, read the [security model and signing explanation](docs/SECURITY-MODEL.md):
+the capture application can see sensitive input, and selecting one device in
+an example is not a security boundary against other privileged software.
+
 The driver uses supported Windows keyboard/mouse paths and HID mapper collections.
 Input passes through normally until an application captures it. The application
 receives scan codes, press/release flags, mouse movement, buttons and wheel data;
@@ -77,7 +82,7 @@ The library manages the capture session automatically. Receive a batch with
 `Send_Input(inputs)`. Types, destinations and counts are automatic. Forward
 unchanged events too: receiving removes them from the input queue.
 
-Six complete [console examples](ExamplesConsole/README.md) demonstrate key swaps,
+The [console examples](ExamplesConsole/README.md) demonstrate key swaps,
 typing, mouse-axis changes and deliberate input blocking. The graphical viewer
 shows the same input families. [Complete API guide](docs/API.md).
 
