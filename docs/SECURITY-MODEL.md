@@ -2,6 +2,13 @@
 
 ## What an authorized capture application can do
 
+For ordinary software-generated keystrokes, consider Windows `SendInput` first.
+Observing a device through Raw Input or handling shortcuts inside your own app
+also does not require this filter. This SDK addresses a different need: changing
+or suppressing supported physical-device events in their input path. Do not add
+a kernel dependency just to trigger an ordinary application shortcut. `SendInput`
+has its own integrity-level and receiver limitations; see [Microsoft's reference](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput).
+
 This is a third-party kernel input filter with an elevated user-mode SDK client.
 The demo also uses its resident boot-clock driver. A capture application can read
 the captured keyboard/mouse events, change or suppress them, and forward others.
