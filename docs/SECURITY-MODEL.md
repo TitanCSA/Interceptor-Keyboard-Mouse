@@ -33,7 +33,7 @@ signature is distinct from authorship, independent security review, and WHQL/HLK
 certification. No additional certification or independent audit is claimed here.
 Installer and example EXEs have their own signature status.
 
-The SDK/example/installer source is public; the kernel source is private and the
+The SDK/example/installer source is public; demo/evaluation driver source is documented in [driver/README.md](../driver/README.md) and the
 driver binaries have separate terms. Reviewing the public SDK does not audit the
 whole stack. See the [published validation scope](DEMO-VALIDATION.md) and
 [installation/recovery instructions](INSTALLATION.md). Those results must not be

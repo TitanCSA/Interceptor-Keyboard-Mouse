@@ -30,8 +30,7 @@ also build their respective installer independently.
 Each build compiles user-mode code only. Installers embed the supplied
 Microsoft-signed demo driver package and the precompiled product-specific
 recovery binaries from `Installer/UI/Package/`. SHA-256 manifests are verified
-before packaging. Driver and recovery binaries are not rebuilt; their source
-and private signing material are not included. Building does not install a
+before packaging. Driver and recovery binaries are not rebuilt by this user-mode build. Demo driver source is documented in [driver/README.md](../driver/README.md); recovery implementation source and private signing material remain excluded. Building does not install a
 driver, capture input or change Windows settings.
 
 The diagnostic worker, installer and viewer self-tests verify user-mode

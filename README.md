@@ -84,7 +84,7 @@ Close other capture applications, including monitors, before opening another
 capture session. These projects share this edition's one-hour-per-kernel-boot
 driver demo; a wrapper does not remove the limit. Read each project's license:
 the Node wrapper is LGPL-3.0-or-later, while bundled stock AutoHotkey retains its
-GPL-2.0 terms. Driver source remains private, with separate full-version terms.
+GPL-2.0 terms. Demo/evaluation driver source is documented in [driver/README.md](driver/README.md); full-version terms remain separate.
 
 ## C++ SDK and examples
 
@@ -105,6 +105,12 @@ shows the same input families. [Complete API guide](docs/API.md).
 <a id="downloads-and-source"></a>
 
 ## Downloads and build
+
+Demo/evaluation driver source is available; see [driver/README.md](driver/README.md) for
+build instructions and separate evaluation-source terms. Those terms apply to
+Titan-authored driver code. Third-party source licenses and existing application/SDK
+licenses remain applicable. Full/commercial implementation and private signing or
+activation material are excluded.
 
 The [latest release](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest)
 contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
@@ -129,7 +135,7 @@ docs/ licenses/    Guides, screenshots and license terms
 Build user-mode applications with Visual Studio 2022 C++ tools, a Windows SDK and
 CMake: `powershell -ExecutionPolicy Bypass -File .\Build.ps1`.
 Builds use the supplied signed driver and compiled recovery binaries.
-**Kernel source is not included.** [Build guide](docs/BUILD.md).
+**Demo/evaluation driver source is documented in [driver/README.md](driver/README.md).** [Build guide](docs/BUILD.md).
 User-mode source is [MIT](LICENSE); driver binaries have
 [separate terms](licenses/BINARY-LICENSE.txt).
 
