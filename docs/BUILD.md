@@ -16,7 +16,7 @@ No WDK or driver-signing account is needed.
 ```
 
 Run with `powershell -ExecutionPolicy Bypass -File .\Build.ps1` if script
-execution is restricted. `InstallerUI/Build.ps1` and `InstallerConsole/Build.ps1`
+execution is restricted. `Installer/UI/Build.ps1` and `Installer/Console/Build.ps1`
 also build their respective installer independently.
 
 | Output | Contents |
@@ -29,7 +29,7 @@ also build their respective installer independently.
 
 Each build compiles user-mode code only. Installers embed the supplied
 Microsoft-signed demo driver package and the precompiled product-specific
-recovery binaries from `InstallerUI/Package/`. SHA-256 manifests are verified
+recovery binaries from `Installer/UI/Package/`. SHA-256 manifests are verified
 before packaging. Driver and recovery binaries are not rebuilt; their source
 and private signing material are not included. Building does not install a
 driver, capture input or change Windows settings.
@@ -49,7 +49,7 @@ edition and do not link both alternative SDK implementations into one executable
 
 Bundle, Microsoft-signed kernel, installers and viewer: **1.0.5.0**; SDK **1.0.0.0**. The package includes the signed resident demo clock.
 
-The console installer build runs `InstallerUI/Tests/InstallerTests.ps1` automatically.
+The console installer build runs `Installer/UI/Tests/InstallerTests.ps1` automatically.
 It exercises the actual shared process runner and mocked installation/uninstallation
 transactions: immediate exits, concurrent stdout/stderr, argument quoting, bounded
 timeouts, PnP startup states, restart-required rollback and retention of recovery.
@@ -59,7 +59,7 @@ callback failures and process lifetime. These tests do not install a driver.
 To run them independently:
 
 ```powershell
-.\InstallerUI\Tests\InstallerTests.ps1 -ReportDirectory .\obj\InstallerTests
+.\Installer\UI\Tests\InstallerTests.ps1 -ReportDirectory .\obj\InstallerTests
 ```
 
 Real installation, reinstall, deferred uninstall and edition coexistence are also

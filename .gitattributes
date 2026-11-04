@@ -1,3 +1,3 @@
 # Signed and integrity-pinned packages must retain their exact distributed bytes.
-InstallerUI/Package/Payload/** -text
-InstallerUI/Package/Recovery/** -text
+Installer/UI/Package/Payload/** -text
+Installer/UI/Package/Recovery/** -text

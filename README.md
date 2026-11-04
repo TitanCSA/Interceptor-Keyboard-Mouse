@@ -18,7 +18,7 @@ device's Windows input path. Requires **Windows 10 1709+ / Windows 11 x64**.
 
 **[Download](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest)** |
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
-[Examples](ExamplesConsole/README.md) | [Compatibility](docs/COMPATIBILITY.md)
+[Examples](Examples/Console/README.md) | [Compatibility](docs/COMPATIBILITY.md)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
@@ -98,7 +98,7 @@ The library manages the capture session automatically. Receive a batch with
 `Send_Input(inputs)`. Types, destinations and counts are automatic. Forward
 unchanged events too: receiving removes them from the input queue.
 
-The [console examples](ExamplesConsole/README.md) demonstrate key swaps,
+The [console examples](Examples/Console/README.md) demonstrate key swaps,
 typing, mouse-axis changes and deliberate input blocking. The graphical viewer
 shows the same input families. [Complete API guide](docs/API.md).
 
@@ -111,16 +111,18 @@ contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
 **InterceptorExampleUI.exe**, examples and source SDK ZIPs, and **SHA256SUMS.txt**.
 
 For raw relative mouse movement, extract the examples ZIP and run
-`ExamplesConsole/09_Mouse_Move_Horizontal.exe` as administrator. Enter `300` or
+`09_Mouse_Move_Horizontal.exe` as administrator. Enter `300` or
 `-485`, then press Enter to send that value directly as mouse X input.
-See the [example instructions](ExamplesConsole/README.md#move-the-mouse-using-raw-relative-x-input).
+See the [example instructions](Examples/Console/README.md#move-the-mouse-using-raw-relative-x-input).
 
 ```text
 Interceptor/       The two-file C++ library
-ExamplesConsole/   Seven keyboard/mouse examples
-ExamplesUI/        Graphical input viewer
-InstallerConsole/  Console installer
-InstallerUI/       GUI, setup engine and compiled driver/recovery binaries
+Examples/
+  Console/         Seven keyboard/mouse examples
+  UI/              Graphical input viewer
+Installer/
+  Console/         Console installer
+  UI/              GUI, setup engine and compiled driver/recovery binaries
 docs/ licenses/    Guides, screenshots and license terms
 ```
 
