@@ -70,6 +70,22 @@ can run alongside it, using its own service, SDK, recovery state and demo allowa
 Remove an overlapping combined [Interceptor](https://github.com/TitanCSA/Interceptor)
 installation first. Use each edition's own SDK in its applications.
 
+## Application examples and language wrappers
+
+Choose a project for this **Keyboard & Mouse edition**:
+
+| Project | Starting point |
+| --- | --- |
+| [AutoHotInterceptor](https://github.com/TitanCSA/AutoHotInterceptor) | AutoHotkey v1/v2 per-device subscriptions and an input monitor; adapted from evilC/AutoHotInterception. |
+| [node-interceptor](https://github.com/TitanCSA/node-interceptor) | Node.js 20+/TypeScript wait, receive and send bindings; adapted from Rami-Sabbagh/node-interception. Install the GitHub release TGZ, not a public npm package. |
+| [Keyboard & Mouse Remapper](https://github.com/TitanCSA/Keyboard-Mouse-Remapper) | A complete native C++ application with IGC scripts, visual rules and timed macros. |
+
+Close other capture applications, including monitors, before opening another
+capture session. These projects share this edition's one-hour-per-kernel-boot
+driver demo; a wrapper does not remove the limit. Read each project's license:
+the Node wrapper is LGPL-3.0-or-later, while bundled stock AutoHotkey retains its
+GPL-2.0 terms. Driver source remains private, with separate full-version terms.
+
 ## C++ SDK and examples
 
 Add [`Interceptor.h`](Interceptor/Interceptor.h) and

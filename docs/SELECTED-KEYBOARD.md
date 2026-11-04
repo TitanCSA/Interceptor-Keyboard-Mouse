@@ -26,9 +26,12 @@ repeat, disconnect/reconnect and recovery on an owned test setup.
 
 Receiving Raw Input identifies sources; it does not by itself suppress their
 original input globally. Regular global hotkeys also do not establish per-device
-selection. This repository provides a native C++ SDK, not a drop-in AHK wrapper or
-the API of another Interception project. Any AHK integration needs its own wrapper
-and matching driver/API review.
+selection. This repository provides the native C++ SDK. For AutoHotkey v1/v2,
+see the separate [AutoHotInterceptor wrapper](https://github.com/TitanCSA/AutoHotInterceptor),
+adapted from evilC/AutoHotInterception for this Keyboard & Mouse driver. Use its
+matching release and close its monitor before starting a capture script. Its
+AHK callbacks use `1` for press and `0` for release. The wrapper shares this
+driver's demo allowance; it does not make other Interception APIs interchangeable.
 
 No MKESPN K809 compatibility claim follows from a request on a forum. Check that
 the actual device exposes a supported, independently identifiable source before
