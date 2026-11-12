@@ -4,7 +4,7 @@ Current source layout and registry coverage. A GitHub download is distinct from 
 
 | Target | Status | Package / documentation |
 | --- | --- | --- |
-| CPP/vcpkg | published_custom_registry | interceptor-keyboard-mouse-sdk |
+| CPP/vcpkg | published_custom_registry | interceptor-keyboard-mouse |
 | CPP/conan | public_recipe_builds_locally |  |
 | CPP/nuget | paused_pending_owner_email_confirmation | Interceptor-Keyboard-Mouse.Native |
 | NET/nuget | binding_not_implemented |  |
