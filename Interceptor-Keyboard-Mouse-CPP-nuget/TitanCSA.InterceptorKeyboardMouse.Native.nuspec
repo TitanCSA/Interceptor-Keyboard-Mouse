@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package><metadata><id>TitanCSA.InterceptorKeyboardMouse.Native</id><version>1.0.5</version><authors>TitanCSA</authors><description>Public Windows x64 C++ source SDK for Interceptor-Keyboard-Mouse. No kernel driver or installer is included.</description><readme>README.md</readme><license type="expression">MIT</license><repository type="git" url="https://github.com/TitanCSA/Interceptor-Keyboard-Mouse" /></metadata></package>

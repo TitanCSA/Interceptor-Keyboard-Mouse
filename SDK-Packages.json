@@ -1,0 +1,21 @@
+{
+  "project": "Interceptor-Keyboard-Mouse",
+  "packages": [
+    {
+      "directory": "Interceptor-Keyboard-Mouse-CPP-vcpkg",
+      "central_registry_status": "not_published",
+      "distribution": "GitHub source and downloadable release artifacts"
+    },
+    {
+      "directory": "Interceptor-Keyboard-Mouse-CPP-conan",
+      "central_registry_status": "not_published",
+      "distribution": "GitHub source and downloadable release artifacts"
+    },
+    {
+      "directory": "Interceptor-Keyboard-Mouse-CPP-nuget",
+      "central_registry_status": "not_published",
+      "distribution": "GitHub source and downloadable release artifacts"
+    }
+  ],
+  "notes": "Registry accounts or community acceptance are separate. No missing language binding is represented as implemented."
+}
