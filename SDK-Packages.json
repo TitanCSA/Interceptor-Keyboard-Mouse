@@ -2,20 +2,27 @@
   "project": "Interceptor-Keyboard-Mouse",
   "packages": [
     {
-      "directory": "Interceptor-Keyboard-Mouse-CPP-vcpkg",
+      "directory": "packaging/native",
       "central_registry_status": "not_published",
-      "distribution": "GitHub source and downloadable release artifacts"
+      "distribution": "GitHub source and downloadable release artifacts",
+      "source_layout": "Shared native SDK source; registry recipes are kept alongside CMakeLists.txt."
     },
     {
-      "directory": "Interceptor-Keyboard-Mouse-CPP-conan",
+      "directory": "packaging/native",
       "central_registry_status": "not_published",
-      "distribution": "GitHub source and downloadable release artifacts"
+      "distribution": "GitHub source and downloadable release artifacts",
+      "source_layout": "Shared native SDK source; registry recipes are kept alongside CMakeLists.txt."
     },
     {
-      "directory": "Interceptor-Keyboard-Mouse-CPP-nuget",
+      "directory": "packaging/native",
       "central_registry_status": "not_published",
-      "distribution": "GitHub source and downloadable release artifacts"
+      "distribution": "GitHub source and downloadable release artifacts",
+      "source_layout": "Shared native SDK source; registry recipes are kept alongside CMakeLists.txt."
     }
   ],
-  "notes": "Registry accounts or community acceptance are separate. No missing language binding is represented as implemented."
+  "notes": "Registry accounts or community acceptance are separate. No missing language binding is represented as implemented.",
+  "native_source_archive": {
+    "url": "https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/sdk-v1.0.5/interceptor-keyboard-mouse-sdk-1.0.5.tar.gz",
+    "sha256": "74e6a896e563285ba6c37954d91117b490e549efa5bee8a069b065d981f3fb64"
+  }
 }
