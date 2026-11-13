@@ -104,10 +104,11 @@
       "registry_published": false,
       "consumer_build_verified": true,
       "documentation_bundled": true,
-      "publication_on_hold_by_owner": true
+      "publication_on_hold_by_owner": false,
+      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
     },
     "NET/nuget": {
-      "status": "built_verified_publication_on_hold_by_owner",
+      "status": "built_verified_requires_trusted_publishing_policy",
       "name": "InterceptorKeyboardMouse.SDK",
       "version": "1.0.0",
       "directory": "Interceptor-Keyboard-Mouse-NET-nuget",
@@ -118,7 +119,8 @@
       "module": "interceptor_keyboard_mouse",
       "dll_name": "InterceptorKeyboardMouseBridge.dll",
       "api_prefix": "interceptor_keyboard_mouse_",
-      "publication_on_hold_by_owner": true
+      "publication_on_hold_by_owner": false,
+      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
     },
     "Python/pypi": {
       "status": "built_fixture_and_production_verified",
