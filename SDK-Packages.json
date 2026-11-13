@@ -98,29 +98,28 @@
       "github_directory": "packaging/native"
     },
     "CPP/nuget": {
-      "status": "account_email_confirmed_requires_matching_trusted_publishing_policy",
+      "status": "published_payload_verified",
       "name": "Interceptor-Keyboard-Mouse.Native",
       "version": "1.0.5",
-      "registry_published": false,
-      "consumer_build_verified": true,
+      "url": "https://www.nuget.org/packages/Interceptor-Keyboard-Mouse.Native/1.0.5",
+      "public_payload_verified": true,
+      "public_consumer_verified": false,
+      "local_consumer_verified": true,
+      "registry_published": true,
       "documentation_bundled": true,
-      "publication_on_hold_by_owner": false,
-      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
+      "publication_on_hold_by_owner": false
     },
     "NET/nuget": {
-      "status": "built_verified_requires_trusted_publishing_policy",
+      "status": "published_payload_verified",
       "name": "InterceptorKeyboardMouse.SDK",
       "version": "1.0.0",
-      "directory": "Interceptor-Keyboard-Mouse-NET-nuget",
-      "registry_published": false,
-      "documentation_bundled": true,
-      "url": null,
+      "url": "https://www.nuget.org/packages/InterceptorKeyboardMouse.SDK/1.0.0",
+      "public_payload_verified": true,
       "public_consumer_verified": false,
-      "module": "interceptor_keyboard_mouse",
-      "dll_name": "InterceptorKeyboardMouseBridge.dll",
-      "api_prefix": "interceptor_keyboard_mouse_",
-      "publication_on_hold_by_owner": false,
-      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
+      "local_consumer_verified": true,
+      "registry_published": true,
+      "documentation_bundled": true,
+      "publication_on_hold_by_owner": false
     },
     "Python/pypi": {
       "status": "built_fixture_and_production_verified",
@@ -171,13 +170,13 @@
       "api_prefix": "interceptor_keyboard_mouse_"
     },
     "JavaScript/npm": {
-      "status": "registry_publication_requires_action",
+      "status": "submitted_requires_indexing",
       "name": "interceptor-keyboard-mouse-sdk",
       "version": "1.0.0",
       "directory": "Interceptor-Keyboard-Mouse-JavaScript-npm",
       "registry_published": false,
       "documentation_bundled": true,
-      "url": "https://www.npmjs.com/package/interceptor-keyboard-mouse-sdk",
+      "url": null,
       "public_consumer_verified": false,
       "module": "interceptor_keyboard_mouse",
       "dll_name": "InterceptorKeyboardMouseBridge.dll",
