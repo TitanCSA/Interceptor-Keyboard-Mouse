@@ -1,0 +1,5 @@
+!lib/native/
+!lib/native/InterceptorKeyboardMouseBridge.dll
+.dart_tool/
+pubspec.lock
+RELEASED.json
