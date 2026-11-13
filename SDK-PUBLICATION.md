@@ -5,11 +5,11 @@ Current source layout and registry coverage. A GitHub download is distinct from 
 | Target | Status | Package / documentation |
 | --- | --- | --- |
 | CPP/vcpkg | published_custom_registry | interceptor-keyboard-mouse |
-| CPP/conan | public_recipe_builds_locally |  [Source](packaging/native/) |
+| CPP/conan | published_custom_source_index | [interceptor-keyboard-mouse](https://github.com/TitanCSA/sdk-packages/tree/089bc73095aa8eda89bacbe10d0b9e58394b0207/conan-index) [Source](packaging/native/) |
 | CPP/nuget | paused_pending_owner_email_confirmation | Interceptor-Keyboard-Mouse.Native |
 | NET/nuget | built_verified_publication_on_hold_by_owner | InterceptorKeyboardMouse.SDK [Source](Interceptor-Keyboard-Mouse-NET-nuget/) |
 | Python/pypi | built_fixture_and_production_verified | interceptor-keyboard-mouse [Source](Interceptor-Keyboard-Mouse-Python-pypi/) |
-| Python/conda-forge | built_tested_requires_official_review | interceptor-keyboard-mouse [Source](packaging/conda/) |
+| Python/conda-forge | custom_channel_install_verified_requires_conda_forge_review | [interceptor-keyboard-mouse](https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel) [Source](packaging/conda/) |
 | Rust/cargo | published_install_verified | [interceptor-keyboard-mouse](https://crates.io/crates/interceptor-keyboard-mouse) [Source](Interceptor-Keyboard-Mouse-Rust-cargo/) |
 | JavaScript/npm | awaiting_browser_publication_authentication | [interceptor-keyboard-mouse-sdk](https://www.npmjs.com/package/interceptor-keyboard-mouse-sdk) [Source](Interceptor-Keyboard-Mouse-JavaScript-npm/) |
 | Java/maven | published_install_verified | [interceptor-keyboard-mouse](https://central.sonatype.com/artifact/io.github.titancsa/interceptor-keyboard-mouse/1.0.0) [Source](Interceptor-Keyboard-Mouse-Java-maven/) |

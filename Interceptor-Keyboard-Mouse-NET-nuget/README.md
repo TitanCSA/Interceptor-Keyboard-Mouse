@@ -1,6 +1,6 @@
 # Interceptor-Keyboard-Mouse .NET SDK
 
-.NET 8+ Windows x64. Package ID: `InterceptorKeyboardMouse.SDK`; NuGet publication is on hold at the owner request. Local installation: `dotnet add package InterceptorKeyboardMouse.SDK --version 1.0.0 --source PATH_TO_LOCAL_PACKAGES`.
+.NET 8+ Windows x64. Package ID: `InterceptorKeyboardMouse.SDK`; Installation: `dotnet add package InterceptorKeyboardMouse.SDK --version 1.0.0`.
 
 ```csharp
 using TitanCSA.Products.InterceptorKeyboardMouse;
