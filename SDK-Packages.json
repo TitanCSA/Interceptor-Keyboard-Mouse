@@ -170,14 +170,14 @@
       "api_prefix": "interceptor_keyboard_mouse_"
     },
     "JavaScript/npm": {
-      "status": "submitted_requires_indexing",
+      "status": "published_install_verified",
       "name": "interceptor-keyboard-mouse-sdk",
       "version": "1.0.0",
       "directory": "Interceptor-Keyboard-Mouse-JavaScript-npm",
-      "registry_published": false,
+      "registry_published": true,
       "documentation_bundled": true,
-      "url": null,
-      "public_consumer_verified": false,
+      "url": "https://www.npmjs.com/package/interceptor-keyboard-mouse-sdk",
+      "public_consumer_verified": true,
       "module": "interceptor_keyboard_mouse",
       "dll_name": "InterceptorKeyboardMouseBridge.dll",
       "api_prefix": "interceptor_keyboard_mouse_"

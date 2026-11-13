@@ -11,7 +11,7 @@ Current source layout and registry coverage. A GitHub download is distinct from 
 | Python/pypi | built_fixture_and_production_verified | interceptor-keyboard-mouse [Source](Interceptor-Keyboard-Mouse-Python-pypi/) |
 | Python/conda-forge | custom_channel_install_verified_requires_conda_forge_review | [interceptor-keyboard-mouse](https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel) [Source](packaging/conda/) |
 | Rust/cargo | published_install_verified | [interceptor-keyboard-mouse](https://crates.io/crates/interceptor-keyboard-mouse) [Source](Interceptor-Keyboard-Mouse-Rust-cargo/) |
-| JavaScript/npm | submitted_requires_indexing | interceptor-keyboard-mouse-sdk [Source](Interceptor-Keyboard-Mouse-JavaScript-npm/) |
+| JavaScript/npm | published_install_verified | [interceptor-keyboard-mouse-sdk](https://www.npmjs.com/package/interceptor-keyboard-mouse-sdk) [Source](Interceptor-Keyboard-Mouse-JavaScript-npm/) |
 | Java/maven | published_install_verified | [interceptor-keyboard-mouse](https://central.sonatype.com/artifact/io.github.titancsa/interceptor-keyboard-mouse/1.0.0) [Source](Interceptor-Keyboard-Mouse-Java-maven/) |
 | Java/jitpack | published_install_verified | [interceptor-keyboard-mouse](https://jitpack.io/#TitanCSA/Interceptor-Keyboard-Mouse/java-sdk-v1.0.0) [Source](Interceptor-Keyboard-Mouse-Java-maven/) |
 | Go/modules | published_install_verified | [interceptor-keyboard-mouse](https://pkg.go.dev/github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules@v1.0.0) [Source](Interceptor-Keyboard-Mouse-Go-modules/) |
