@@ -77,8 +77,10 @@ Choose a project for this **Keyboard & Mouse edition**:
 | Project | Starting point |
 | --- | --- |
 | [AutoHotInterceptor](https://github.com/TitanCSA/AutoHotInterceptor) | AutoHotkey v1/v2 per-device subscriptions and an input monitor; adapted from evilC/AutoHotInterception. |
-| [node-interceptor](https://github.com/TitanCSA/node-interceptor) | Node.js 20+/TypeScript wait, receive and send bindings; adapted from Rami-Sabbagh/node-interception. Install the GitHub release TGZ, not a public npm package. |
+| [node-interceptor](https://github.com/TitanCSA/node-interceptor) | Node.js 20+/TypeScript wait, receive and send bindings; adapted from Rami-Sabbagh/node-interception. Install with `npm install interceptor-keyboard-mouse`; see its README for driver setup and examples. |
 | [Keyboard & Mouse Remapper](https://github.com/TitanCSA/Keyboard-Mouse-Remapper) | A complete native C++ application with IGC scripts, visual rules and timed macros. |
+
+The `interceptor-keyboard-mouse` package is the node-interceptor adapter with its `Interception` / `Device` API. The `interceptor-keyboard-mouse-sdk` package in the installation table below exposes this product SDK through its `Interceptor` API. Use the examples for the package you installed; their names and APIs are not interchangeable.
 
 Close other capture applications, including monitors, before opening another
 capture session. These projects share this edition's one-hour-per-kernel-boot
@@ -235,7 +237,7 @@ Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK 
 | PyPI | `interceptor_keyboard_mouse` | Commande prevue apres publication : `python -m pip install interceptor-keyboard-mouse==1.0.0` |
 | Conda | `interceptor-keyboard-mouse` | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge interceptor-keyboard-mouse` (canal TitanCSA) |
 | crates.io | `interceptor_keyboard_mouse` | `cargo add interceptor-keyboard-mouse@1.0.0` |
-| npm | `interceptor_keyboard_mouse` | `npm install interceptor-keyboard-mouse-sdk@1.0.0` |
+| npm | `interceptor-keyboard-mouse-sdk` | `npm install interceptor-keyboard-mouse-sdk@1.0.0` |
 | Maven Central | `io.github.titancsa:interceptor-keyboard-mouse` | `io.github.titancsa:interceptor-keyboard-mouse:1.0.0 (pom.xml / Gradle)` |
 | JitPack | `com.github.TitanCSA:Interceptor-Keyboard-Mouse` | `com.github.TitanCSA:Interceptor-Keyboard-Mouse:java-sdk-v1.0.0 (avec le depot JitPack)` |
 | Go Modules | `github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules` | `go get github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules@v1.0.0` |
