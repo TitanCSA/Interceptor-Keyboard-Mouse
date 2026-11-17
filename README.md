@@ -251,3 +251,15 @@ Les anciens imports Go et versions JitPack gardent leurs tags. Pour les ancienne
 >
 > Tell me whether you need personal use, business integration or OEM redistribution, and ask for pricing and license / activation instructions.
 <!-- full-version-contact:end -->
+
+## Performance & Benchmarks
+
+[Measured results and raw data](https://titancsa.github.io/TitanCSA-Benchmarks/interceptor/results/) · [Comparisons](https://titancsa.github.io/TitanCSA-Benchmarks/comparisons/) · [Methodology](https://titancsa.github.io/TitanCSA-Benchmarks/methodology/measurement/)
+
+Virtual HID input crosses the tested filter and is checked by a separate Windows Raw Input receiver, with per-run PnP and capture evidence. These are publisher-operated Windows 11 Hyper-V software-path measurements, not physical USB latency or a universal speed ranking.
+
+| Tested scope | Verified result |
+|---|---|
+| Virtual keyboard/mouse filter paths | 6 validated runs: forwarding, mouse remapping and controlled blocking |
+
+**Stability limitation:** the Vdevice-backed controller campaign reproduced an unresolved guest WDF queue-purge bugcheck. Successful timings do not establish safe repeated teardown. See the [incident and test limits](https://titancsa.github.io/TitanCSA-Benchmarks/methodology/incident-wdf-001/).
