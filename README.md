@@ -223,18 +223,18 @@ Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK 
 | Conan | `interceptor-keyboard-mouse` | `conan install --requires=interceptor-keyboard-mouse/1.0.5 -r titancsa --build=missing -s compiler.cppstd=17` |
 | NuGet | `Interceptor-Keyboard-Mouse.Native` | `Install-Package Interceptor-Keyboard-Mouse.Native -Version 1.0.5` |
 | NuGet | `InterceptorKeyboardMouse.SDK` | `dotnet add package InterceptorKeyboardMouse.SDK --version 1.0.0` |
-| PyPI | `interceptor_keyboard_mouse` | Commande prevue apres publication : `python -m pip install interceptor-keyboard-mouse==1.0.0` |
+| PyPI | `interceptor-keyboard-mouse` | Commande prevue apres publication : `python -m pip install interceptor-keyboard-mouse==1.0.0` |
 | Conda | `interceptor-keyboard-mouse` | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge interceptor-keyboard-mouse` (canal TitanCSA) |
-| crates.io | `interceptor_keyboard_mouse` | `cargo add interceptor-keyboard-mouse@1.0.0` |
+| crates.io | `interceptor-keyboard-mouse` | `cargo add interceptor-keyboard-mouse@1.0.0` |
 | npm | `interceptor-keyboard-mouse-sdk` | `npm install interceptor-keyboard-mouse-sdk@1.0.0` |
 | Maven Central | `io.github.titancsa:interceptor-keyboard-mouse` | `io.github.titancsa:interceptor-keyboard-mouse:1.0.0 (pom.xml / Gradle)` |
 | JitPack | `com.github.TitanCSA:Interceptor-Keyboard-Mouse` | `com.github.TitanCSA:Interceptor-Keyboard-Mouse:java-sdk-v1.0.0 (avec le depot JitPack)` |
 | Go Modules | `github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules` | `go get github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules@v1.0.0` |
 | pkg.go.dev | `github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules` | `Documentation : https://pkg.go.dev/github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules@v1.0.0` |
-| PowerShell Gallery | `interceptor_keyboard_mouse` | `Install-Module InterceptorKeyboardMouse -RequiredVersion 1.0.0 -Scope CurrentUser` |
+| PowerShell Gallery | `InterceptorKeyboardMouse` | `Install-Module InterceptorKeyboardMouse -RequiredVersion 1.0.0 -Scope CurrentUser` |
 | pub.dev | `interceptor_keyboard_mouse` | `dart pub add interceptor_keyboard_mouse:1.0.0` |
-| RubyGems | `interceptor_keyboard_mouse` | `gem install interceptor-keyboard-mouse -v 1.0.0` |
-| Packagist | `interceptor_keyboard_mouse` | Commande prevue apres publication : `composer require titancsa/interceptor-keyboard-mouse:1.0.0` |
+| RubyGems | `interceptor-keyboard-mouse` | `gem install interceptor-keyboard-mouse -v 1.0.0` |
+| Packagist | `titancsa/interceptor-keyboard-mouse` | Commande prevue apres publication : `composer require titancsa/interceptor-keyboard-mouse:1.0.0` |
 
 Pour vcpkg et Conan, configure d abord le registre TitanCSA avec [le guide complet](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse/README.md). Le guide explique aussi Maven/Gradle, les prerequis et le chargement des DLL. Les pilotes/applications du produit sont installes separement. Les commandes marquees prevues ne sont pas encore disponibles.
 
