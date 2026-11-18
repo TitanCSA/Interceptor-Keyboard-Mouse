@@ -234,7 +234,7 @@ Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK 
 | PowerShell Gallery | `InterceptorKeyboardMouse` | `Install-Module InterceptorKeyboardMouse -RequiredVersion 1.0.0 -Scope CurrentUser` |
 | pub.dev | `interceptor_keyboard_mouse` | `dart pub add interceptor_keyboard_mouse:1.0.0` |
 | RubyGems | `interceptor-keyboard-mouse` | `gem install interceptor-keyboard-mouse -v 1.0.0` |
-| Packagist | `titancsa/interceptor-keyboard-mouse` | Commande prevue apres publication : `composer require titancsa/interceptor-keyboard-mouse:1.0.0` |
+| Packagist | `titancsa/interceptor-keyboard-mouse` | `composer require titancsa/interceptor-keyboard-mouse:1.0.0` |
 
 Pour vcpkg et Conan, configure d abord le registre TitanCSA avec [le guide complet](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse/README.md). Le guide explique aussi Maven/Gradle, les prerequis et le chargement des DLL. Les pilotes/applications du produit sont installes separement. Les commandes marquees prevues ne sont pas encore disponibles.
 
