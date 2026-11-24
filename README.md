@@ -21,6 +21,8 @@ Screenshots illustrate the interface; preview inputs are simulated.
 
 ## Install and use
 
+Try the [second-keyboard AutoHotkey v2 quickstart](https://titancsa.github.io/guides/autohotkey-remap-second-keyboard/) to compare the remapped and original input side by side.
+
 1. Download this repository's **InterceptorSetup.exe** and accept elevation.
 2. Choose **Install / reinstall**. Use Windows **Restart** if requested, then
    reopen setup to finish device associations.
@@ -244,14 +246,9 @@ Les anciens imports Go et versions JitPack gardent leurs tags. Pour les ancienne
 <!-- central-sdk-packages:end -->
 
 <!-- full-version-contact:start -->
-> [!IMPORTANT]
-> **Get the full version without demo restrictions**
+> **Licensed Release** · [Buy Interceptor Keyboard & Mouse directly](https://licences.configcsa.com/interceptor-keyboard-mouse).
 >
-> **Discord username: `titancsa`**
->
-> Open Discord, choose **Friends > Add Friend**, enter **`titancsa`**, then send a direct message. Ask for the **full version without the demo time limit**, and mention **Interceptor Keyboard & Mouse**.
->
-> Tell me whether you need personal use, business integration or OEM redistribution, and ask for pricing and license / activation instructions.
+> For integration, OEM and support questions, contact `titancsa` on Discord.
 <!-- full-version-contact:end -->
 
 ## Performance & Benchmarks
@@ -264,4 +261,4 @@ Virtual HID input crosses the tested filter and is checked by a separate Windows
 |---|---|
 | Virtual keyboard/mouse filter paths | 6 validated runs: forwarding, mouse remapping and controlled blocking |
 
-**Stability limitation:** the Vdevice-backed controller campaign reproduced an unresolved guest WDF queue-purge bugcheck. Successful timings do not establish safe repeated teardown. See the [incident and test limits](https://titancsa.github.io/TitanCSA-Benchmarks/methodology/incident-wdf-001/).
+**Vdevice benchmark status.** The original campaign recorded a controller teardown crash with demo 1.0.5.0. The signed 1.0.6.0 demo passed separate teardown tests. Commercial Vdevice qualification remains pending. [Incident and edition status](https://titancsa.github.io/TitanCSA-Benchmarks/methodology/incident-wdf-001/).
