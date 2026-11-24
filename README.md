@@ -143,7 +143,7 @@ and shared across this edition's applications. Sleep counts; closing, uninstalli
 or reinstalling does not reset the allowance. Capture diagnostics can start it.
 At expiry, capture/injection stop and physical input passes through normally.
 Use Windows **Restart** for another allowance; Fast Startup shutdown does not
-reset the kernel boot. For the unrestricted version, DM **`titancsa`** on Discord.
+reset the kernel boot. [Get the licensed Release](https://licences.configcsa.com/interceptor-keyboard-mouse).
 
 This independent project evolves the workflow popularized by
 [oblitum/Interception](https://github.com/oblitum/Interception), with its own
