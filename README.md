@@ -231,6 +231,7 @@ Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK 
 | Conda | `interceptor-keyboard-mouse` | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge interceptor-keyboard-mouse` (canal TitanCSA) |
 | crates.io | `interceptor-keyboard-mouse` | `cargo add interceptor-keyboard-mouse@1.0.0` |
 | npm | `interceptor-keyboard-mouse-sdk` | `npm install interceptor-keyboard-mouse-sdk@1.0.0` |
+| GitHub | [interceptor-keyboard-mouse-sdk 1.0.1](https://github.com/TitanCSA/sdk-packages/releases/download/node-input-sdk-v1.0.1/interceptor-keyboard-mouse-sdk-1.0.1.tgz) | `npm install ./interceptor-keyboard-mouse-sdk-1.0.1.tgz` |
 | Maven Central | `io.github.titancsa:interceptor-keyboard-mouse` | `io.github.titancsa:interceptor-keyboard-mouse:1.0.0 (pom.xml / Gradle)` |
 | JitPack | `com.github.TitanCSA:Interceptor-Keyboard-Mouse` | `com.github.TitanCSA:Interceptor-Keyboard-Mouse:java-sdk-v1.0.0 (avec le depot JitPack)` |
 | Go Modules | `github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules` | `go get github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules@v1.0.0` |
