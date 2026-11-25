@@ -59,7 +59,8 @@ static void ResetLocked(UCHAR mask,ULONG reason) {
     for(p=gDevices.Flink;p!=&gDevices;p=p->Flink) {
         DEVICE_CONTEXT* d=CONTAINING_RECORD(p,DEVICE_CONTEXT,link);
         if(mask&(d->keyboard?IC_KEYBOARD:IC_MOUSE)) {
-            InterlockedExchange(&d->recover,TRUE);KeSetEvent(&d->maintenanceEvent,IO_NO_INCREMENT,FALSE);
+            InterlockedExchange(&d->recover,TRUE);
+            KeSetEvent(&d->maintenanceEvent,IO_NO_INCREMENT,FALSE);
         }
     }
 }
@@ -191,13 +192,19 @@ void IcDeviceReadyLocked(DEVICE_CONTEXT* d) {
     FILE_CONTEXT* f=gOwners[d->keyboard?0:1];ULONG stream=d->keyboard?0:1;
     if(!f)return;
     if(!f->allCapture) {ResetLocked(IC_ALL_STREAMS,IC_RESET_DEVICE);return;}
-    if(d->captureId || d->stop || !d->thread || !d->connection.ClassService)return;
+    if(d->captureId || !IcKeyboardMouseReady(d))return;
     if(!IcAllAttachLocked(stream+1))return;
     d->captureId=++f->counts[stream];
     f->targets[(stream?IC_MAX_DEVICES:0)+d->captureId-1]=d;
 }
+static void UpdateChordLocked(void) {
+    const BOOLEAN chord=IcPhysicalChordLocked();
+    if(chord&&!gChord) {
+        ULONG i;for(i=0;i<IC_STREAM_COUNT;++i)if(gOwners[i]){ResetLocked(IC_ALL_STREAMS,IC_RESET_HOTKEY);break;}
+    }
+    gChord=chord;
+}
 void IcPhysicalKeys(DEVICE_CONTEXT* d,const UCHAR current[256]) {
-    BOOLEAN chord;
     // keys is owned by this device's reader; no global lock or device walk is
     // needed when the three physical modifier states have not changed.
     if((BOOLEAN)(d->keys[0xE0]||d->keys[0xE4])==(BOOLEAN)(current[0xE0]||current[0xE4]) &&
@@ -210,11 +217,7 @@ void IcPhysicalKeys(DEVICE_CONTEXT* d,const UCHAR current[256]) {
     d->physicalCtrl=(BOOLEAN)(current[0xE0]||current[0xE4]);
     d->physicalAlt=(BOOLEAN)(current[0xE2]||current[0xE6]);
     d->physicalDelete=(BOOLEAN)(current[0x4C]!=0);
-    chord=IcPhysicalChordLocked();
-    if(chord&&!gChord) {
-        ULONG i;for(i=0;i<IC_STREAM_COUNT;++i)if(gOwners[i]){ResetLocked(IC_ALL_STREAMS,IC_RESET_HOTKEY);break;}
-    }
-    gChord=chord;
+    UpdateChordLocked();
     WdfWaitLockRelease(gGate);
 }
 void IcRoute(DEVICE_CONTEXT* d,PVOID packet) {
@@ -225,7 +228,9 @@ void IcRoute(DEVICE_CONTEXT* d,PVOID packet) {
         // Stop may have won the gate after the outer check. A newer snapshot
         // can already exclude this reader; it must neither route nor revoke it.
         if(d->stop) {WdfWaitLockRelease(gGate);break;}
-        if(gOwners[stream] && !d->captureId) {IcDeviceReadyLocked(d);if(gOwners[stream] && !d->captureId)ResetLocked(IC_ALL_STREAMS,IC_RESET_DEVICE);}
+        if(gOwners[stream] && !d->captureId) {
+            IcDeviceReadyLocked(d);if(gOwners[stream] && !d->captureId)ResetLocked(IC_ALL_STREAMS,IC_RESET_DEVICE);
+        }
         if(gOwners[stream] && gRings[stream].count==IC_CAPACITY) {
             ++gOverflows;ResetLocked(IC_ALL_STREAMS,IC_RESET_OVERFLOW);
         }
@@ -259,7 +264,6 @@ void IcRoute(DEVICE_CONTEXT* d,PVOID packet) {
         }
     }
 }
-
 void IcFileCreate(WDFDEVICE device,WDFREQUEST request,WDFFILEOBJECT file) {
     NTSTATUS status=STATUS_DEVICE_NOT_CONNECTED;
     WdfWaitLockAcquire(gLifetime,NULL);
@@ -294,8 +298,8 @@ static NTSTATUS QueryDeviceLocked(ULONG type,ULONG token,BOOLEAN ordinal,IC_DEVI
             if(d->info.type!=type)continue;
             if((ordinal?++position:d->id)!=token)continue;
             result->instance_token=d->id;
-            result->flags=(d->thread && !d->stop && d->connection.ClassService?1u:0u)|
-                (d->thread && !d->stop?2u:0u)|(d->connection.ClassService?16u:0u);
+            result->flags=(IcKeyboardMouseReady(d)?1u:0u)|
+                (d->thread && !d->stop?2u:0u)|(IcKeyboardMouseConnected(d)?16u:0u);
             result->last_read_status=(ULONG)d->readStatus;result->report_bytes=d->info.input_bytes;
             RtlCopyMemory(result->instance,d->instance,sizeof(result->instance));
             if(result->instance[0])result->flags|=IC_QUERY_IDENTITY_VALID;
@@ -386,7 +390,7 @@ static NTSTATUS CreateLocked(FILE_CONTEXT* f,const IC_CREATE* in,ULONGLONG xusbE
     for(i=0;i<IC_STREAM_COUNT;++i)if((mask&(1u<<i))&&gOwners[i])return STATUS_SHARING_VIOLATION;
     for(entry=gDevices.Flink;entry!=&gDevices;entry=entry->Flink) {
         DEVICE_CONTEXT* d=CONTAINING_RECORD(entry,DEVICE_CONTEXT,link);
-        if((in->mask&(d->keyboard?IC_KEYBOARD:IC_MOUSE)) && !d->stop && d->thread && d->connection.ClassService) {++count;++counts[d->keyboard?0:1];}
+        if((in->mask&(d->keyboard?IC_KEYBOARD:IC_MOUSE)) && IcKeyboardMouseReady(d)) {++count;++counts[d->keyboard?0:1];}
     }
     if(mask&IC_READY_HID)hidCount=IcHidCountLocked();
     if(mask&IC_READY_XUSB)xusbCount=IcXusbCountLocked();
@@ -451,7 +455,7 @@ static NTSTATUS CreateLocked(FILE_CONTEXT* f,const IC_CREATE* in,ULONGLONG xusbE
         DEVICE_CONTEXT* d=CONTAINING_RECORD(entry,DEVICE_CONTEXT,link);
         if(!(in->mask&(d->keyboard?IC_KEYBOARD:IC_MOUSE)))continue;
         d->captureId=0;
-        if(!d->stop && d->thread && d->connection.ClassService) {
+        if(IcKeyboardMouseReady(d)) {
             d->captureId=++ids[d->keyboard?0:1];devices[count]=d->info;
             devices[count++].id=d->captureId;
             targets[(d->keyboard?0:all?IC_MAX_DEVICES:counts[0])+d->captureId-1]=d;
@@ -468,7 +472,9 @@ static NTSTATUS CreateLocked(FILE_CONTEXT* f,const IC_CREATE* in,ULONGLONG xusbE
         // capture FIFO. Wake it instead of waiting for its retry deadline.
         for(p=gDevices.Flink;p!=&gDevices;p=p->Flink) {
             DEVICE_CONTEXT* d=CONTAINING_RECORD(p,DEVICE_CONTEXT,link);
-            if(in->mask&(d->keyboard?IC_KEYBOARD:IC_MOUSE))KeSetEvent(&d->maintenanceEvent,IO_NO_INCREMENT,FALSE);
+            if(in->mask&(d->keyboard?IC_KEYBOARD:IC_MOUSE)) {
+                KeSetEvent(&d->maintenanceEvent,IO_NO_INCREMENT,FALSE);
+            }
         }
     }
     if(all) {
@@ -549,16 +555,16 @@ static DEVICE_CONTEXT* FindDeviceLocked(ULONG id,BOOLEAN keyboard,FILE_CONTEXT* 
         // before freeing the target, so this O(1) lookup cannot use a stale node.
         if(!resolved)return NULL;
         target=owner->targets[base+resolved-1];
-        if(!target->stop && target->thread && target->connection.ClassService)return target;
+        if(IcKeyboardMouseReady(target))return target;
         for(i=0;i<owner->counts[keyboard?0:1];++i) {
             target=owner->targets[base+i];
-            if(!target->stop && target->thread && target->connection.ClassService)return target;
+            if(IcKeyboardMouseReady(target))return target;
         }
         return NULL;
     }
     for(p=gDevices.Flink;p!=&gDevices;p=p->Flink) {
         DEVICE_CONTEXT* d=CONTAINING_RECORD(p,DEVICE_CONTEXT,link);
-        if(d->keyboard!=keyboard || d->stop || !d->thread || !d->connection.ClassService)continue;
+        if(d->keyboard!=keyboard || !IcKeyboardMouseReady(d))continue;
         ++ordinal;if(!first)first=d;
         if(id==ordinal)return d;
     }

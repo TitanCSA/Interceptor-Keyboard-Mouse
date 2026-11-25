@@ -114,6 +114,11 @@ namespace InterceptorSetup {
    if(row.Kind=="Control"){d.Add("Interceptor control",snapshot.ApiAvailable?"pass":"error",snapshot.ApiDetail);return;}
    if(row.Kind=="Xbox HID view"||row.Kind=="XInputHID"&&row.PropertyFlags==14){d.Add("Secondary view","unverified","This collection is the Windows view of a native controller. Capture is tested on its XUSB/GIP parent; this row is not tested separately. See the parent results.");return;}
    d.Add("Association",row.Associated?"pass":"warning",row.Associated?"An Interceptor reference is present; actual availability is checked separately.":"Interceptor is not associated with this instance. Use Associate new devices if its profile is supported, then restart if Windows requests it.");
+   if(row.Associated&&(row.Kind=="Keyboard"||row.Kind=="Mouse")){
+    bool correct=String.Equals(row.Service,"InterceptorKeyboardMouse",StringComparison.OrdinalIgnoreCase)
+     && FilterCount(row.UpperFilters)+FilterCount(row.LowerFilters)+FilterCount(row.ClassFilters)==0;
+    d.Add("Input mapper",correct?"pass":"error",correct?"Interceptor is the function driver of this device.":"Run the current installer to replace the previous filter-only association.");
+   }
    if(row.Associated&&Type(row)>=3){
     bool lower=row.Kind=="GIP";int correct=lower?FilterCount(row.LowerFilters):FilterCount(row.UpperFilters)+FilterCount(row.ClassUpperFilters);int wrong=lower?FilterCount(row.UpperFilters)+FilterCount(row.ClassUpperFilters)+FilterCount(row.ClassLowerFilters):FilterCount(row.LowerFilters)+FilterCount(row.ClassLowerFilters);
     d.Add("Filter position",correct==1&&wrong==0?"pass":"error","Expected: "+(lower?"GIP instance LowerFilters":"Collection or class UpperFilters")+"; correct references="+correct+", references elsewhere="+wrong+". "+(correct==1&&wrong==0?"Filter placement is consistent. Presence alone does not prove filter ordering or exclude third-party conflicts.":"Inconsistent or duplicate association: restore and associate using the installer. Do not manually remove third-party filters."));

@@ -168,18 +168,31 @@ NTSTATUS FilterAdd(WDFDRIVER driver, PWDFDEVICE_INIT init) {
         }
 #if IC_PRODUCT_HAS_KEYBOARD_MOUSE
         if(!RtlEqualUnicodeString(&actual,&keyboardClass,TRUE) && !RtlEqualUnicodeString(&actual,&mouseClass,TRUE))return IcUnrecognizedFilter(init);
-        WdfDeviceInitSetDeviceType(init,RtlEqualUnicodeString(&actual,&keyboardClass,TRUE)?FILE_DEVICE_KEYBOARD:FILE_DEVICE_MOUSE);
+        {
+            WCHAR service[128]={0};WDF_DEVICE_PROPERTY_DATA property;DEVPROPTYPE type;ULONG bytes;
+            DECLARE_CONST_UNICODE_STRING(ours,IC_PRODUCT_SERVICE);
+            const BOOLEAN keyboard=RtlEqualUnicodeString(&actual,&keyboardClass,TRUE);
+            WDF_DEVICE_PROPERTY_DATA_INIT(&property,&DEVPKEY_Device_Service);
+            status=WdfFdoInitQueryPropertyEx(init,&property,sizeof(service)-sizeof(WCHAR),service,&bytes,&type);
+            if(NT_SUCCESS(status) && type==DEVPROP_TYPE_STRING) {
+                RtlInitUnicodeString(&actual,service);
+                if(!RtlEqualUnicodeString(&actual,&ours,TRUE))return IcUnrecognizedFilter(init);
+            }
+            WdfDeviceInitSetDeviceType(init,keyboard?FILE_DEVICE_KEYBOARD:FILE_DEVICE_MOUSE);
+        }
 #else
         return IcUnrecognizedFilter(init);
 #endif
     }
 #if IC_PRODUCT_HAS_KEYBOARD_MOUSE
     WdfDeviceInitSetIoType(init, WdfDeviceIoBuffered);
+    status=WdfDeviceInitAssignWdmIrpPreprocessCallback(init,FilterDeviceControl,IRP_MJ_DEVICE_CONTROL,NULL,0);
+    if(!NT_SUCCESS(status))return status;
     {
         WDF_FILEOBJECT_CONFIG file;
         WDF_FILEOBJECT_CONFIG_INIT(&file,WDF_NO_EVENT_CALLBACK,WDF_NO_EVENT_CALLBACK,FilterHidCleanup);
         file.AutoForwardCleanupClose=WdfTrue;file.FileObjectClass=WdfFileObjectWdfCannotUseFsContexts;
-        WDF_OBJECT_ATTRIBUTES_INIT(&attributes);attributes.ExecutionLevel=WdfExecutionLevelPassive;
+        WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes,MAPPER_FILE_CONTEXT);attributes.ExecutionLevel=WdfExecutionLevelPassive;
         attributes.SynchronizationScope=WdfSynchronizationScopeNone;
         WdfDeviceInitSetFileObjectConfig(init,&file,&attributes);
     }
@@ -194,14 +207,16 @@ NTSTATUS FilterAdd(WDFDRIVER driver, PWDFDEVICE_INIT init) {
     attributes.ExecutionLevel = WdfExecutionLevelPassive;
     attributes.SynchronizationScope = WdfSynchronizationScopeNone;
     status = WdfDeviceCreate(&init, &attributes, &device); if (!NT_SUCCESS(status)) return status;
-    status=IcFdoAdded();if(!NT_SUCCESS(status))return status;
-    { WDF_OBJECT_ATTRIBUTES child; WDFOBJECT token;
+    status=IcFdoAdded();
+    if(NT_SUCCESS(status)) { WDF_OBJECT_ATTRIBUTES child; WDFOBJECT token;
       WDF_OBJECT_ATTRIBUTES_INIT(&child);child.ParentObject=device;child.EvtCleanupCallback=IcMapperCleanup;
-      status=WdfObjectCreate(&child,&token);if(!NT_SUCCESS(status)) { IcFdoRemoved();return status; } }
+      status=WdfObjectCreate(&child,&token);if(!NT_SUCCESS(status))IcFdoRemoved(); }
     d = FilterDevice(device); d->device = device; d->id = (ULONG)InterlockedIncrement(&gDeviceId);
     IcCacheDeviceInstance(device,d->instance);
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);attributes.ParentObject=device;
     status=WdfWaitLockCreate(&attributes,&d->stateLock);if(!NT_SUCCESS(status))return status;
+    status=FilterInitialize(device,(BOOLEAN)(WdfDeviceWdmGetDeviceObject(device)->DeviceType==FILE_DEVICE_KEYBOARD));
+    if(!NT_SUCCESS(status))return status;
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queue, WdfIoQueueDispatchSequential);
     queue.EvtIoInternalDeviceControl = FilterInternal;
     queue.EvtIoDeviceControl = FilterInternal;

@@ -7,7 +7,7 @@ function Assert-Administrator {
     if([Environment]::OSVersion.Version.Build -lt 16299) { throw 'Windows 10 version 1709 ou plus recent, ou Windows 11 x64 requis.' }
 }
 function Assert-InterceptorInstallationBoundary {
-    foreach($name in @('Interceptor')){
+    foreach($name in @('Interceptor','InterceptorKeyboardMouseRelease')){
         if(Test-Path -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\'+$name)){
             $script:InterceptorLastExitCode=1638
             throw ('Incompatible Interceptor edition is still installed or pending removal: '+$name+'. Uninstall that edition and restart Windows before installing this product. Its driver and services were not changed.')
@@ -52,7 +52,10 @@ function Assert-InterceptorPayload([string]$Payload,[switch]$AllowDevelopment) {
     $names=@('InterceptorKeyboardMouse.sys','InterceptorKeyboardMouseKeyboard.inf','InterceptorKeyboardMouseMouse.inf','InterceptorKeyboardMouseControl.inf','interceptorkeyboardmousekeyboard.cat','interceptorkeyboardmousemouse.cat','interceptorkeyboardmousecontrol.cat','InterceptorExample.exe')
     if($mode -eq 'Development' -and !$AllowDevelopment){throw 'This product has a new driver identity. Microsoft signing is required before installation. Submit the product CAB and import its signed return; no Windows setting was changed.'}
     if(Test-Path -LiteralPath (Join-Path $Payload 'Signing.json')){$names+= 'Signing.json'}
+    $policy=Get-Content -LiteralPath (Join-Path $Payload 'Signing.json') -Raw|ConvertFrom-Json
+    if([version]$policy.DriverVersion -lt [version]'1.0.5.4'){throw 'This installer requires the keyboard and mouse mapper packages, version 1.0.5.4 or later.'}
     $clockRequired=@(Get-ChildItem -LiteralPath $Payload -Filter '*Control.inf'|Where-Object {[IO.File]::ReadAllText($_.FullName).Contains('TitanDemoClock.sys')}).Count -gt 0
+    if(!$clockRequired -or !$policy.ClockRequired -or $policy.TrialSeconds -ne 3600){throw 'The one-hour demo requires its resident kernel clock.'}
     if($clockRequired){$names+='TitanDemoClock.sys'}
     foreach($name in $names) {
         $path=Join-Path $Payload $name
@@ -61,6 +64,7 @@ function Assert-InterceptorPayload([string]$Payload,[switch]$AllowDevelopment) {
     foreach($name in @('InterceptorKeyboardMouseKeyboard.inf','InterceptorKeyboardMouseMouse.inf','InterceptorKeyboardMouseControl.inf')){
         $inf=Get-Content -LiteralPath (Join-Path $Payload $name) -Raw
         if($inf -notmatch '(?im)^\s*AddService\s*=\s*InterceptorKeyboardMouse\s*,'){throw "Unexpected service identity: $name"}
+        if($name -notlike '*Control.inf' -and $inf -notmatch '(?im)^\s*AddService\s*=\s*InterceptorKeyboardMouse\s*,\s*2\s*,'){throw "Input package must install Interceptor as the function driver: $name"}
     }
     if($mode -eq 'Microsoft') {
         if($clockRequired){$sig=Get-AuthenticodeSignature -LiteralPath (Join-Path $Payload 'TitanDemoClock.sys');if($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notlike 'CN=Microsoft Windows Hardware Compatibility Publisher,*'){throw 'Invalid resident clock signature.'}}

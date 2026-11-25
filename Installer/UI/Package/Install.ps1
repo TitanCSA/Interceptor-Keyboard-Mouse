@@ -9,6 +9,15 @@ try {
     Get-InterceptorWindowsTool 'sc.exe'|Out-Null
     Enter-InterceptorOperation
     Assert-InterceptorInstallationBoundary
+    $serviceKey='HKLM:\SYSTEM\CurrentControlSet\Services\'+$script:InterceptorService
+    $pendingRemoval=if(Test-Path -LiteralPath $serviceKey){
+        (Get-ItemProperty -LiteralPath $serviceKey -ErrorAction Stop).DeleteFlag
+    }
+    if($pendingRemoval -eq 1){
+        Write-Host 'Windows is still removing a previous installation of this edition. Restart Windows normally, then reopen setup.'
+        $code=3010
+        exit $code
+    }
     Start-InterceptorLog 'install';$logged=$true
     Set-InterceptorPhase 'Snapshot original Windows device bindings'
     $baseline=Save-InterceptorBaseline
@@ -26,6 +35,14 @@ try {
     $bindingStarted=$true
     $code=Invoke-InterceptorSetupHelper $helper @('--install',$payload)
     if($code -notin @(0,3010)){throw ('Device association failed: '+$code)}
+    if($baseline.Devices -and (Restore-InterceptorManufacturerBindings $baseline)){$code=3010}
+    # Remove superseded input packages so a disconnected device cannot select
+    # an older mapper or the interim filter on its next plug.
+    foreach($legacy in @(Get-InterceptorPackages|Where-Object {
+        [IO.Path]::GetFileName($_.OriginalFileName) -in @('interceptorkeyboardmousekeyboard.inf','interceptorkeyboardmousemouse.inf') -and
+        [version]$_.Version -lt [version]'1.0.5.4'
+    })){Remove-InterceptorPackage $legacy.Driver}
+    if($script:InterceptorNeedsReboot){$code=3010}
     if($code -eq 0){
         if((Invoke-InterceptorSetupHelper $helper @('--status') 20000) -ne 0){throw 'Driver API did not respond after installation.'}
         Set-InterceptorPhase 'Initialize supported input interfaces'

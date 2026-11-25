@@ -14,6 +14,7 @@ function CheckBoundary([string[]]$Present,[bool]$ExpectedBlocked){
 CheckBoundary @() $false
 CheckBoundary @($script:InterceptorService) $false
 CheckBoundary @('Interceptor') ($script:InterceptorService -ne 'Interceptor')
+CheckBoundary @('InterceptorKeyboardMouseRelease') $true
 CheckBoundary @('InterceptorKeyboardMouse','InterceptorGamepadController') ($script:InterceptorService -eq 'Interceptor')
 
 $fixture=Join-Path $ReportDirectory ('SetupFixture-'+[guid]::NewGuid().ToString('N')+'.exe')
@@ -48,12 +49,16 @@ $clock=[Diagnostics.Stopwatch]::StartNew();$timedOut=$false
 try{Invoke-InterceptorProcess $fixture @('sleep') -TimeoutMs 150 -Capture|Out-Null}catch [TimeoutException]{$timedOut=$true}catch{if($_.Exception.Message -like '*timed out*'){$timedOut=$true}else{throw}}
 Expect ($timedOut -and $script:InterceptorProcessTimedOut -and $script:InterceptorLastExitCode -eq 1460 -and $clock.ElapsedMilliseconds -lt 10000) 'Timeout not bounded or evidence not marked'
 $script:InterceptorProcessTimedOut=$false
-function Row([string]$Id='ROOT\fixture\0000',[int]$Problem=0,[uint32]$Flags=8,[bool]$Root=$true,[int]$Query=0,[bool]$Owned=$true){
- [pscustomobject]@{instance=$Id;root=$Root;owned=$Owned;status_error=$Query;status=$Flags;problem=$Problem}
+function Row([string]$Id='ROOT\fixture\0000',[int]$Problem=0,[uint32]$Flags=8,[bool]$Root=$true,[int]$Query=0,[bool]$Owned=$true,[bool]$FilterOnly=$false){
+ [pscustomobject]@{instance=$Id;root=$Root;owned=$Owned;filter_only=$FilterOnly;status_error=$Query;status=$Flags;problem=$Problem}
 }
 function State([object[]]$Devices){[pscustomobject]@{schema=1;service=$script:InterceptorService;devices=$Devices}}
 $root=Row;$before=State @($root)
 Expect (Get-InterceptorSetupAssessment (State @($root)) $before).Ready 'Healthy endpoint rejected'
+$legacy=State @($root,(Row 'HID\fixture\legacy' -Root $false -FilterOnly $true))
+Expect (!(Get-InterceptorSetupAssessment $legacy $before).Settled) 'Superseded filter-only association accepted after migration'
+$pendingMigration=Get-InterceptorSetupAssessment $legacy $before -RestartRequested
+Expect ($pendingMigration.Settled -and $pendingMigration.RestartRequired -and !$pendingMigration.Ready) 'Pending function-driver migration reported ready'
 Expect (!(Get-InterceptorSetupAssessment (State @()) $before).Settled) 'Missing endpoint accepted'
 for($i=1;$i -le 57;$i++){
  $a=Get-InterceptorSetupAssessment (State @((Row -Problem $i -Flags 1024))) $before -RestartRequested
@@ -120,11 +125,15 @@ function Assert-InterceptorUsbPackage($p) {}
 function Get-InterceptorWindowsTool($n){return 'unused'}
 function Enter-InterceptorOperation {}
 function Assert-InterceptorInstallationBoundary {}
+$script:InterceptorService='InstallerAuditFixture'
+function Test-Path { param($LiteralPath) return [bool]$case.PendingRemoval }
+function Get-ItemProperty { param($LiteralPath,$ErrorAction) return [pscustomobject]@{DeleteFlag=1} }
 function Start-InterceptorLog($n){$events.Add('log')}
 function Stop-Transcript {}
 function Get-InterceptorDataRoot {return $PSScriptRoot}
 function Set-InterceptorPhase($p){$events.Add($p)}
-function Save-InterceptorBaseline {return [pscustomobject]@{PendingUninstall=$false;FinalizeAttempts=0}}
+function Save-InterceptorBaseline {return [pscustomobject]@{PendingUninstall=$false;FinalizeAttempts=0;Devices=if($case.ManufacturerRestart){@('fixture')}else{@()}}}
+function Restore-InterceptorManufacturerBindings($s){$events.Add('restore-manufacturer');return [bool]$case.ManufacturerRestart}
 function Write-InterceptorState($s) {}
 function Get-InterceptorSetupState($h){return [pscustomobject]@{devices=@()}}
 function Get-InterceptorPackages {
@@ -157,6 +166,8 @@ $pwsh=Join-Path ([Environment]::SystemDirectory) 'WindowsPowerShell\v1.0\powersh
 foreach($c in @(
  @{Fail=$false;Restore=0;Timeout=$false;StageRestart=$false},
  @{Fail=$false;Restore=0;Timeout=$false;StageRestart=$true},
+ @{Fail=$false;Restore=0;Timeout=$false;StageRestart=$false;ManufacturerRestart=$true},
+ @{PendingRemoval=$true},
  @{Fail=$true;Restore=3010;Timeout=$false;StageRestart=$false},
  @{Fail=$true;Restore=7;Timeout=$false;StageRestart=$false},
  @{Fail=$true;Restore=0;Timeout=$false;StageRestart=$false},
@@ -165,9 +176,16 @@ foreach($c in @(
  [IO.File]::WriteAllText((Join-Path $caseDirectory 'case.json'),($c|ConvertTo-Json))
  $r=Invoke-InterceptorProcess $pwsh @('-NoProfile','-NonInteractive','-File',(Join-Path $caseDirectory 'Install.ps1')) -Capture
  $events=Get-Content -LiteralPath (Join-Path $caseDirectory 'events.json') -Raw|ConvertFrom-Json
- if(!$c.Fail){Expect ($r.ExitCode -eq $(if($c.StageRestart){3010}else{0})) 'Staging reboot code lost';Expect ('verify' -in $events) 'Success without PnP verification'}
+ if($c.PendingRemoval){Expect ($r.ExitCode -eq 3010 -and $events.Count -eq 0) 'Pending service removal changed installation state';continue}
+ if(!$c.Fail){Expect ($r.ExitCode -eq $(if($c.StageRestart -or $c.ManufacturerRestart){3010}else{0})) 'Reboot code lost';Expect ('verify' -in $events) 'Success without PnP verification'}
  elseif($c.Timeout){Expect ($r.ExitCode -eq 1460 -and '--restore' -notin $events -and 'remove=oem2.inf' -notin $events) 'Timeout caused competing rollback/deletion'}
  else{Expect ($r.ExitCode -eq 7) 'Original failure code lost';Expect (('remove=oem2.inf' -in $events) -eq ($c.Restore -eq 0)) 'Unsafe package removal before restoration completed'}
+ if($c.ManufacturerRestart){
+  $sequence=[array]$events
+  Expect ([array]::IndexOf($sequence,'restore-manufacturer') -gt [array]::IndexOf($sequence,'--install') -and
+          [array]::IndexOf($sequence,'restore-manufacturer') -lt [array]::IndexOf($sequence,'verify') -and
+          '--status' -notin $events) 'Manufacturer restoration must request a restart before verification'
+ }
  Expect ('remove=oem1.inf' -notin $events) 'Existing package removed by failed installation'
 }
 

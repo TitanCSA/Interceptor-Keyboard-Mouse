@@ -75,7 +75,8 @@ inline bool Has(const std::vector<std::wstring>& names,const wchar_t* value) {
 }
 inline bool ForeignInterceptor(const std::wstring& name) {
     return !Equal(name,IC_SDK_SERVICE) && (Equal(name,L"Interceptor") ||
-        Equal(name,L"InterceptorKeyboardMouse") || Equal(name,L"InterceptorGamepadController"));
+        Equal(name,L"InterceptorKeyboardMouse") || Equal(name,L"InterceptorKeyboardMouseRelease") ||
+        Equal(name,L"InterceptorGamepadController"));
 }
 inline bool ForeignFilters(const std::vector<std::wstring>& names) {
     return std::any_of(names.begin(),names.end(),[](const auto& name){return ForeignInterceptor(name);});
@@ -1848,6 +1849,8 @@ void CheckStarted(SP_DEVINFO_DATA& device,Init_Result& result) {
     else if(!(status&DN_STARTED) || (status&DN_HAS_PROBLEM))RecordError(result,ERROR_NOT_READY);
 }
 bool ForeignStackFilters(HDEVINFO set,SP_DEVINFO_DATA& device,Init_Result& result,const std::wstring& id);
+std::vector<wchar_t> MultiProperty(HDEVINFO set,SP_DEVINFO_DATA& device,DWORD property);
+std::vector<std::wstring> FilterNames(const std::vector<wchar_t>& values);
 void Associate(HDEVINFO set,SP_DEVINFO_DATA& device,bool mouse,Init_Result& result) {
     const auto hardware=Property(set,device,SPDRP_HARDWAREID);
     if(_wcsnicmp(hardware.c_str(),L"HID\\",4)) {++result.skipped;return;}
@@ -1866,6 +1869,17 @@ void Associate(HDEVINFO set,SP_DEVINFO_DATA& device,bool mouse,Init_Result& resu
     if(ForeignStackFilters(set,device,result,instance))return;
     if(!_wcsicmp(service.c_str(),IC_SDK_SERVICE)) {++result.already_associated;CheckStarted(device,result);return;}
     if(_wcsicmp(service.c_str(),mouse?L"mouhid":L"kbdhid")) {++result.skipped;return;}
+    const bool wasFilter=Policy::Has(FilterNames(MultiProperty(set,device,SPDRP_UPPERFILTERS)),IC_SDK_SERVICE);
+    if(wasFilter) {
+        RecordError(result,ERROR_REVISION_MISMATCH);
+        result.skipped_devices.push_back({instance,L"Run the current installer to migrate the interim filter association",ERROR_REVISION_MISMATCH});
+        return;
+    }
+    if(!SetupDetail::UsesInboxInputMapper(set,device,mouse)) {
+        ++result.skipped;
+        result.skipped_devices.push_back({instance,L"The manufacturer owns this input driver package",ERROR_NOT_SUPPORTED});
+        return;
+    }
     const auto profile=SetupDetail::ProbeMapperProfile(set,device,mouse);
     if(!profile.supported) {
         ++result.skipped;result.skipped_devices.push_back({instance,profile.reason,profile.error});return;
@@ -1881,8 +1895,7 @@ void Associate(HDEVINFO set,SP_DEVINFO_DATA& device,bool mouse,Init_Result& resu
             if(GetLastError()!=ERROR_NO_MORE_ITEMS) {RecordError(result,GetLastError());return;}
             break;
         }
-        if(_wcsicmp(candidate.ProviderName,L"InterceptorKeyboardMouse Project") ||
-           _wcsicmp(candidate.Description,mouse?L"InterceptorKeyboardMouse HID Mouse Mapper":L"InterceptorKeyboardMouse HID Keyboard Mapper"))continue;
+        if(!SetupDetail::IsMapperPackage(set,device,candidate,mouse))continue;
         if(!found || candidate.DriverVersion>selected.DriverVersion ||
            (candidate.DriverVersion==selected.DriverVersion && CompareFileTime(&candidate.DriverDate,&selected.DriverDate)>0)) {selected=candidate;found=true;}
     }
@@ -1890,9 +1903,12 @@ void Associate(HDEVINFO set,SP_DEVINFO_DATA& device,bool mouse,Init_Result& resu
     // A different installer or PnP may have changed the instance since the
     // metadata probe. Preserve a newly selected custom driver rather than bind.
     if(_wcsicmp(Property(set,device,SPDRP_SERVICE).c_str(),service.c_str()) ||
-       _wcsicmp(Property(set,device,SPDRP_HARDWAREID).c_str(),hardware.c_str())) {
+       _wcsicmp(Property(set,device,SPDRP_HARDWAREID).c_str(),hardware.c_str()) ||
+       Policy::Has(FilterNames(MultiProperty(set,device,SPDRP_UPPERFILTERS)),IC_SDK_SERVICE) ||
+       !SetupDetail::UsesInboxInputMapper(set,device,mouse)) {
         ++result.skipped;result.skipped_devices.push_back({instance,L"Mapper identity/service changed before association",ERROR_RETRY});return;
     }
+    const auto displayName=SetupDetail::ReadMapperDisplayName(set,device);
     BOOL reboot=FALSE;
     // Exact devnode, not an update of every instance sharing a hardware ID.
     const BOOL installed=DiInstallDevice(nullptr,set,&device,&selected,DIIDFLAG_NOFINISHINSTALLUI,&reboot);
@@ -1901,6 +1917,8 @@ void Associate(HDEVINFO set,SP_DEVINFO_DATA& device,bool mouse,Init_Result& resu
     if(SetupDiGetDeviceInstallParamsW(set,&device,&params))result.reboot_required|=(params.Flags&(DI_NEEDREBOOT|DI_NEEDRESTART))!=0;
     if(!installed) {RecordError(result,error);return;}
     ++result.associated;
+    const auto nameError=SetupDetail::KeepMapperDisplayName(set,device,displayName);
+    if(nameError!=ERROR_SUCCESS)RecordError(result,nameError);
     if(!result.reboot_required)CheckStarted(device,result);
 }
 
@@ -2004,7 +2022,6 @@ bool ActiveControllerFilter(const std::wstring& id,const GUID& guid=IC_HID_INTER
     }
     return (item.Flags&SPINT_ACTIVE)!=0;
 }
-std::vector<std::wstring> FilterNames(const std::vector<wchar_t>& values);
 bool NativeClassFilterMissing(const GUID& deviceClass,DWORD property);
 std::vector<std::wstring> NativeClassFilters(const GUID& deviceClass,DWORD property,
     decltype(&SetupDiGetClassRegistryPropertyW) query=SetupDiGetClassRegistryPropertyW,

@@ -19,6 +19,11 @@
 #include "../Shared/DeviceQuery.h"
 #include "../Shared/CaptureAll.h"
 #define FILTER_TAG 'pIcI'
+typedef struct MAPPER_FILE_CONTEXT {
+    LIST_ENTRY link;
+    PFILE_OBJECT file;
+} MAPPER_FILE_CONTEXT;
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(MAPPER_FILE_CONTEXT,MapperFile)
 
 BOOLEAN IcAllCaptureLocked(ULONG type);
 BOOLEAN IcAllAttachLocked(ULONG type);
@@ -32,6 +37,8 @@ typedef struct DEVICE_CONTEXT {
     WDFREQUEST readRequest;
     WDFMEMORY readMemory;
     KEVENT readDone;
+    KEVENT configurationEvent;
+    KEVENT readerStarted;
     KEVENT stopEvent;
     KEVENT maintenanceEvent;
     NTSTATUS readStatus;
@@ -40,6 +47,12 @@ typedef struct DEVICE_CONTEXT {
     PFILE_OBJECT hidFile;
     PHIDP_VALUE_CAPS values;
     USHORT valueCount;
+    PUSAGE buttonUsages;
+    ULONG buttonUsageCapacity;
+    MOUSE_ATTRIBUTES mouseAttributes;
+    KEYBOARD_ATTRIBUTES keyboardAttributes;
+    USHORT indicatorMask;
+    BOOLEAN flipWheel,flipHorizontal,forceAbsolute;
     // Descriptor index + 1, by report ID and X/Y/wheel/horizontal wheel.
     // Zero means absent. Built once in PrepareHardware, immutable while reading.
     USHORT axisCaps[256][4];
@@ -52,7 +65,7 @@ typedef struct DEVICE_CONTEXT {
     LONG absoluteX,absoluteY;
     USAGE repeatUsage;
     ULONGLONG repeatAt;
-    USHORT indicators;
+    volatile LONG indicators;
     KEYBOARD_TYPEMATIC_PARAMETERS typematic;
     PETHREAD thread;
     volatile LONG stop;
@@ -70,8 +83,18 @@ typedef struct DEVICE_CONTEXT {
     volatile LONG recover;
     UCHAR deliveredKeys[384];
     UCHAR deliveredButtons;
+    BOOLEAN powered,readerReady;
+    LIST_ENTRY readFiles;
+    WDFTIMER retryTimer;
+    volatile LONG indicatorDirty;
 } DEVICE_CONTEXT;
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT,FilterDevice)
+static __inline BOOLEAN IcKeyboardMouseConnected(const DEVICE_CONTEXT* d) {
+    return (BOOLEAN)(d->connection.ClassService!=NULL);
+}
+static __inline BOOLEAN IcKeyboardMouseReady(const DEVICE_CONTEXT* d) {
+    return (BOOLEAN)(d->readerReady && !d->stop && IcKeyboardMouseConnected(d));
+}
 extern WDFSPINLOCK gLock;
 extern WDFWAITLOCK gGate;
 void IcTrialResumeLocked(void); // Power/start transitions only; caller holds gGate.
@@ -87,6 +110,7 @@ NTSTATUS FilterRelease(WDFDEVICE,WDFCMRESLIST);
 NTSTATUS FilterStart(WDFDEVICE);
 void FilterStop(WDFDEVICE);
 NTSTATUS FilterSuspend(WDFDEVICE);
+EVT_WDFDEVICE_WDM_IRP_PREPROCESS FilterDeviceControl;
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL FilterInternal;
 EVT_WDF_IO_QUEUE_IO_DEFAULT FilterMapperCreate;
 EVT_WDF_DEVICE_FILE_CREATE FilterHidCreate;
@@ -97,3 +121,4 @@ void IcControlDelete(void);
 NTSTATUS IcFdoAdded(void);
 void IcFdoRemoved(void);
 void IcCacheDeviceInstance(WDFDEVICE device,USHORT instance[256]);
+NTSTATUS FilterInitialize(WDFDEVICE device,BOOLEAN keyboard);

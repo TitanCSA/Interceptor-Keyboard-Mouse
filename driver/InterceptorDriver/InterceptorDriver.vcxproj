@@ -20,7 +20,7 @@
   <ItemGroup><ClCompile Include="Control.c"/><ClCompile Include="Trial.c"/><ClCompile Include="Device.c"/><ClCompile Include="HidMapper.c"/><ClCompile Include="ControllersDisabled.c"/></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="BuildResidentTrialClock" AfterTargets="Build">
-    <PropertyGroup><ResidentClockOut Condition="'$(ResidentClockOut)'==''">$(MSBuildProjectDirectory)\..\bin\ResidentClock\$(Configuration)\$(TrialLabSeconds)\</ResidentClockOut></PropertyGroup>
+    <PropertyGroup><ResidentClockOut>$(MSBuildProjectDirectory)\..\bin\ResidentClock\$(Configuration)\$(TrialLabSeconds)\</ResidentClockOut></PropertyGroup>
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\TrialClock\TrialClock.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);VCToolsVersion=$(VCToolsVersion);TrialLabSeconds=$(TrialLabSeconds);TargetName=TitanDemoClock;OutDir=$(ResidentClockOut);IntDir=$(ResidentClockOut)obj\" />
     <Copy SourceFiles="$(ResidentClockOut)TitanDemoClock.sys;$(ResidentClockOut)TitanDemoClock.pdb" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>

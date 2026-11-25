@@ -1,3 +1,4 @@
+#include <string_view>
 #define IC_SDK_INTERNAL 1
 #include "Interceptor.h"
 #include "SetupHealth.h"
@@ -122,6 +123,13 @@ int wmain(int argc,wchar_t** argv) {
         }
         Destroy_Context();return 0;
     } catch(const std::system_error& e) {
+        const std::wstring_view command=argc>1?argv[1]:L"";
+        if(command==L"--install" || command==L"--install-control" || command==L"--associate" ||
+           command==L"--restore" || command==L"--remove-control" || command==L"--setup-state") {
+            const auto code=e.code().value();
+            std::cerr<<e.what()<<" (Windows code 0x"<<std::hex<<static_cast<unsigned>(code)<<std::dec<<")\n";
+            return code?code:ERROR_GEN_FAILURE;
+        }
         if(e.code().value()==ERROR_OPERATION_ABORTED) { std::cout<<"Capture revoked; normal input restored.\n";return 0; }
         std::cerr<<e.what()<<"\n";return 1;
     } catch(const std::exception& e) { std::cerr<<e.what()<<"\n";return 1; }

@@ -9,8 +9,8 @@ If another Interceptor edition is installed, follow [the removal steps](docs/INS
 
 **Try it**
 
-1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.0-demo/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
-2. Open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.0-demo/InterceptorExampleUI.exe).
+1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
+2. Open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo/InterceptorExampleUI.exe).
 3. Press a key or move the mouse. Check that your device appears in the viewer. Click **Stop** when you finish.
 <!-- simple-start:end -->
 
@@ -25,7 +25,9 @@ If another Interceptor edition is installed, follow [the removal steps](docs/INS
 <summary>Project details and screenshots</summary>
 
 Capture, remap or block **physical keyboard and mouse input** with a
-**Microsoft-signed kernel filter driver** and a **two-file C++17 SDK**.
+**Microsoft-signed HID keyboard and mouse driver** and a **two-file C++17 SDK**.
+
+Demo 1.0.5.4 replaces the Windows HID function driver on supported inbox device stacks. Setup preserves manufacturer-owned HID packages. Initialization and recovery work independently of input capture, and HID requests such as feature reports pass through to Windows HIDClass.
 Identify each source, receive its input and forward your changes through the
 device's Windows input path. Requires **Windows 10 1709+ / Windows 11 x64**.
 

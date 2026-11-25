@@ -1,6 +1,22 @@
 #pragma once
 #include "InterceptorProtocol.h"
 
+// Send modifier makes before ordinary makes and modifier breaks after ordinary
+// breaks so a chord carried by one HID report retains its class-driver meaning.
+static __inline unsigned IcHidCollectKeyChanges(const uint8_t previous[256],
+    const uint8_t current[256],int pressed,uint16_t changed[256]) {
+    unsigned count=0,pass,usage;
+    for(pass=0;pass<2;++pass) {
+        const int wantModifier=pressed?(pass==0):(pass==1);
+        for(usage=4;usage<256;++usage) {
+            const int modifier=usage>=0xe0 && usage<=0xe7;
+            if(modifier==wantModifier && previous[usage]!=current[usage] &&
+                (current[usage]!=0)==(pressed!=0))changed[count++]=(uint16_t)usage;
+        }
+    }
+    return count;
+}
+
 // Merge one HID keyboard report into the union of all report IDs. A usage can
 // be present in several IDs, so releasing it in one report must not release it
 // globally while another still owns it. All arrays start at zero. The input

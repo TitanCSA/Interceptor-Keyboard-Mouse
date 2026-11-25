@@ -73,6 +73,10 @@ function Get-InterceptorSetupAssessment {
             $problem=[uint32]$device.problem;$flags=[uint32]$device.status
             if($problem -ne 0 -and $problem -ne 14){$status='Failed';$reason='Windows device problem '+$problem+'.'}
             elseif($problem -eq 14 -or ($flags -band 0x100)){$status='Restart';$reason='Windows requires a restart.'}
+            elseif($device.filter_only){
+                $status=if($RestartRequested){'Restart'}else{'Failed'}
+                $reason='The previous filter-only association is still present. Interceptor must be the function driver.'
+            }
             elseif($device.owned -and !($flags -band 0x400) -and ($flags -band 8)){$status='Ready';$reason='Device is started and associated with this product.'}
             elseif($device.owned -and $RestartRequested -and !($flags -band 0x400)){$status='Restart';$reason='Setup requested a restart before this device can start.'}
         }

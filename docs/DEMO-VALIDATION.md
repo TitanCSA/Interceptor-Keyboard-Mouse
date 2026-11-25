@@ -1,23 +1,18 @@
-# Validation scope - 1.0.5.0
+# Validation scope for demo 1.0.5.4
 
-The embedded driver and required demo clock carry valid Microsoft Windows
-Hardware Compatibility Publisher signatures. Their executable bodies and INF
-files match the frozen production candidates. Kernel catalog membership is
-verified for every package, including the shared primary driver image.
+The embedded keyboard and mouse driver and resident demo clock carry Microsoft
+Windows Hardware Compatibility Publisher signatures. The INF files and driver
+code match the submitted production candidate. Catalog membership was verified
+for each package. The GUI and console installers embed the same signed payload.
 
-The SDK, viewer and installers are rebuilt from this release's public sources.
-Installer and viewer self-tests perform no installation or capture. The input
-changes have passed extracted production-code regression, memory and stress
-tests; AddressSanitizer checks those user-mode fixtures, not a running kernel.
-An isolated Windows 10 VM exercised the combined candidate's keyboard, mouse
-and generic HID sends. These bounded results are not physical device-to-game
-latency measurements or proof of universal hardware compatibility.
+Installer, viewer, product and SDK tests pass on Windows x64. The corrected
+driver code was tested on a Windows 10 virtual machine after a reboot. The
+mouse HID input-buffer query returned the same value as the Windows driver,
+and the demo captured and forwarded input from the virtual mouse.
 
-An independent native Windows XUSB/ViGEm removal fault (Verifier C9/7) reproduced
-with Interceptor absent. The unsafe virtual-XUSB benchmark scenario is disabled;
-its removal crash is not claimed fixed by this driver. No zero-crash guarantee
-or zero-latency claim is made.
+The installer preserves manufacturer-owned driver packages and the replacement
+driver forwards external HID requests to Windows HIDClass. Compatibility with
+Razer Synapse on physical hardware remains to be verified.
 
-The demo remains 3,600 seconds per product per Windows kernel boot, shared by
-applications. The existing trial clock policy and expiry behavior are unchanged.
-Use Windows Restart after setup requests it. Demo driver source is documented separately in [driver/README.md](../driver/README.md). Full/commercial implementation and private signing material are excluded from this user-mode SDK distribution.
+The demo runs for 3,600 seconds per Windows kernel boot, shared across apps.
+Use Windows Restart after setup requests it.

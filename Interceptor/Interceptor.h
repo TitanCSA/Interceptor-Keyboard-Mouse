@@ -22,7 +22,7 @@
 #define IC_SDK_SERVICE L"InterceptorKeyboardMouse"
 #define IC_SDK_DOS_DEVICE L"\\\\.\\InterceptorKeyboardMouse"
 
-// Interceptor SDK 1.0.5.0. Compile Interceptor.cpp once alongside your application.
+// Interceptor SDK 1.0.5.4. Compile Interceptor.cpp once alongside your application.
 // This header has no local-header dependencies. Windows x64, C++17.
 
 // ---- Interceptor.h ----
@@ -32,7 +32,6 @@
 #define NOMINMAX
 #endif
 #include <Windows.h>
-#include <winioctl.h>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -984,6 +983,100 @@ static __inline IC_MAPPER_PROFILE_RESULT IcMapperProfile(unsigned long descripto
 #pragma comment(lib,"setupapi.lib")
 
 namespace Interceptor::SetupDetail {
+inline std::wstring InstalledMapperProperty(HDEVINFO set,SP_DEVINFO_DATA& device,const wchar_t* name) {
+    HKEY key=SetupDiOpenDevRegKey(set,&device,DICS_FLAG_GLOBAL,0,DIREG_DRV,KEY_QUERY_VALUE);
+    if(key==INVALID_HANDLE_VALUE)return {};
+    wchar_t value[MAX_PATH]{};
+    DWORD bytes=sizeof(value);
+    const auto status=RegGetValueW(key,nullptr,name,RRF_RT_REG_SZ,nullptr,value,&bytes);
+    RegCloseKey(key);
+    return status==ERROR_SUCCESS?std::wstring(value):std::wstring{};
+}
+inline bool UsesInboxInputMapper(HDEVINFO set,SP_DEVINFO_DATA& device,bool mouse) {
+    const auto inf=InstalledMapperProperty(set,device,L"InfPath");
+    return !_wcsicmp(inf.c_str(),mouse?L"msmouse.inf":L"keyboard.inf");
+}
+inline bool IsInputPackageInf(const wchar_t* inf,bool mouse) {
+    DWORD size=0;
+    if(!SetupGetInfInformationW(inf,INFINFO_INF_NAME_IS_ABSOLUTE,nullptr,0,&size) || !size)return false;
+    std::vector<BYTE> bytes(size);
+    auto* info=reinterpret_cast<SP_INF_INFORMATION*>(bytes.data());
+    if(!SetupGetInfInformationW(inf,INFINFO_INF_NAME_IS_ABSOLUTE,info,size,nullptr))return false;
+    SP_ORIGINAL_FILE_INFO_W original{};
+    original.cbSize=sizeof(original);
+    if(!SetupQueryInfOriginalFileInformationW(info,0,nullptr,&original))return false;
+    return !_wcsicmp(original.OriginalInfName,mouse?
+        L"InterceptorKeyboardMouseMouse.inf":L"InterceptorKeyboardMouseKeyboard.inf");
+}
+inline bool IsMapperPackage(HDEVINFO set,SP_DEVINFO_DATA& device,SP_DRVINFO_DATA_W& driver,bool mouse) {
+    // Do not reselect an older package or the superseded filter-only candidate.
+    constexpr ULONGLONG firstMapperVersion=(1ull<<48)|(5ull<<16)|4ull;
+    if(driver.DriverVersion<firstMapperVersion)return false;
+    if(_wcsicmp(driver.ProviderName,L"TitanCSA Keyboard Mouse"))return false;
+    SP_DRVINFO_DETAIL_DATA_W detail{};
+    detail.cbSize=sizeof(detail);
+    if(!SetupDiGetDriverInfoDetailW(set,&device,&driver,&detail,sizeof(detail),nullptr) &&
+       GetLastError()!=ERROR_INSUFFICIENT_BUFFER)return false;
+    if(_wcsicmp(detail.SectionName,L"Mapper") || !detail.InfFileName[0])return false;
+
+    return IsInputPackageInf(detail.InfFileName,mouse);
+}
+
+// Track only the FriendlyName value we add to preserve a prior driver description.
+inline constexpr DEVPROPKEY MapperDisplayNameOverride{
+    {0xad4456f7,0x7058,0x475c,{0xa4,0x05,0x82,0x6c,0x18,0x7c,0xcc,0x24}},2};
+struct MapperDisplayName {
+    std::wstring value;
+    bool wasFriendly=false;
+};
+inline std::wstring MapperNameProperty(HDEVINFO set,SP_DEVINFO_DATA& device,DWORD property) {
+    wchar_t name[LINE_LEN]{};
+    DWORD type=0;
+    if(!SetupDiGetDeviceRegistryPropertyW(set,&device,property,&type,
+        reinterpret_cast<BYTE*>(name),sizeof(name),nullptr) || type!=REG_SZ)return {};
+    name[_countof(name)-1]=L'\0';
+    return name;
+}
+inline MapperDisplayName ReadMapperDisplayName(HDEVINFO set,SP_DEVINFO_DATA& device,bool useDescription=true) {
+    auto friendly=MapperNameProperty(set,device,SPDRP_FRIENDLYNAME);
+    if(!friendly.empty())return {std::move(friendly),true};
+    if(useDescription)return {MapperNameProperty(set,device,SPDRP_DEVICEDESC),false};
+    return {};
+}
+inline DWORD WriteMapperDisplayNameOverride(HDEVINFO set,SP_DEVINFO_DATA& device,std::wstring value) {
+    return SetupDiSetDevicePropertyW(set,&device,&MapperDisplayNameOverride,
+        value.empty()?DEVPROP_TYPE_EMPTY:DEVPROP_TYPE_STRING,
+        value.empty()?nullptr:reinterpret_cast<BYTE*>(value.data()),
+        value.empty()?0:static_cast<DWORD>((value.size()+1)*sizeof(wchar_t)),0)?ERROR_SUCCESS:GetLastError();
+}
+inline DWORD KeepMapperDisplayName(HDEVINFO set,SP_DEVINFO_DATA& device,const MapperDisplayName& original) {
+    if(original.value.empty() || !MapperNameProperty(set,device,SPDRP_FRIENDLYNAME).empty() ||
+       MapperNameProperty(set,device,SPDRP_DEVICEDESC)==original.value)return ERROR_SUCCESS;
+    if(!original.wasFriendly) {
+        const auto error=WriteMapperDisplayNameOverride(set,device,original.value);
+        if(error!=ERROR_SUCCESS)return error;
+    }
+    if(SetupDiSetDeviceRegistryPropertyW(set,&device,SPDRP_FRIENDLYNAME,
+        reinterpret_cast<const BYTE*>(original.value.c_str()),
+        static_cast<DWORD>((original.value.size()+1)*sizeof(wchar_t))))return ERROR_SUCCESS;
+    const DWORD error=GetLastError();
+    if(!original.wasFriendly)(void)WriteMapperDisplayNameOverride(set,device,{});
+    return error;
+}
+inline DWORD ClearMapperDisplayName(HDEVINFO set,SP_DEVINFO_DATA& device) {
+    wchar_t name[LINE_LEN]{};
+    DEVPROPTYPE type=0;
+    if(!SetupDiGetDevicePropertyW(set,&device,&MapperDisplayNameOverride,&type,
+        reinterpret_cast<BYTE*>(name),sizeof(name),nullptr,0)) {
+        const auto error=GetLastError();
+        return error==ERROR_NOT_FOUND?ERROR_SUCCESS:error;
+    }
+    if(type!=DEVPROP_TYPE_STRING)return ERROR_INVALID_DATA;
+    name[_countof(name)-1]=L'\0';
+    if(MapperNameProperty(set,device,SPDRP_FRIENDLYNAME)==name &&
+       !SetupDiSetDeviceRegistryPropertyW(set,&device,SPDRP_FRIENDLYNAME,nullptr,0))return GetLastError();
+    return WriteMapperDisplayNameOverride(set,device,{});
+}
 struct MapperProfileProbe {
     bool supported=false;
     IC_MAPPER_PROFILE_RESULT profile=IC_MAPPER_PROFILE_OK;
