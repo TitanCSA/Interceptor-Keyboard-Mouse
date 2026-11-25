@@ -9,7 +9,7 @@ device's Windows input path. Requires **Windows 10 1709+ / Windows 11 x64**.
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
 [Examples](Examples/Console/README.md) | [Compatibility](docs/COMPATIBILITY.md)
 
-[Project overview and edition guide](https://titancsa.github.io/projects/interceptor-keyboard-mouse/) · [Buy the licensed Release](https://licences.configcsa.com/interceptor-keyboard-mouse)
+[Project overview and edition guide](https://titancsa.github.io/projects/interceptor-keyboard-mouse/) · [Buy Release · €400 Lifetime](https://licences.configcsa.com/interceptor-keyboard-mouse)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
