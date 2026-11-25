@@ -1,4 +1,4 @@
-# Interceptor Keyboard & Mouse - Windows Kernel Filter Driver
+# Interceptor Keyboard & Mouse
 
 <!-- simple-start:start -->
 Read or change input from one keyboard or mouse, even when several are connected.
