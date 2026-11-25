@@ -3,11 +3,13 @@
 <!-- simple-start:start -->
 Read or change input from one keyboard or mouse, even when several are connected.
 
+[First steps](#first-steps) · [Develop](#sdk-and-packages) · [Maintain](https://github.com/TitanCSA/sdk-packages/blob/main/CONTRIBUTING.md)
+
+## First steps
+
 **64-bit Windows 10 version 1709 or later, or Windows 11.**
 
 If another Interceptor edition is installed, follow [the removal steps](docs/INSTALLATION.md) first.
-
-**Try it**
 
 1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
 2. Open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo/InterceptorExampleUI.exe).
@@ -245,33 +247,13 @@ You are solely responsible for how you use, modify or distribute the software, f
 To the maximum extent permitted by applicable law, the software is provided "AS IS", without warranties of any kind, and TitanCSA and the contributors are not liable for claims, damages, data loss, system damage or other consequences arising from its use or misuse. Nothing in this notice excludes liability that cannot legally be excluded. Existing project and third-party license terms remain applicable.
 
 <!-- central-sdk-packages:start -->
-## Paquets et installation
+<a name="paquets-et-installation"></a>
 
-Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK dedie](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse). Choisis le paquet a installer puis execute sa commande dans son dossier.
+## SDK and packages
 
-| Registre | Paquet | Installation / utilisation |
-| --- | --- | --- |
-| vcpkg | `interceptor-keyboard-mouse` | `vcpkg install interceptor-keyboard-mouse:x64-windows` |
-| Conan | `interceptor-keyboard-mouse` | `conan install --requires=interceptor-keyboard-mouse/1.0.5 -r titancsa --build=missing -s compiler.cppstd=17` |
-| NuGet | `Interceptor-Keyboard-Mouse.Native` | `Install-Package Interceptor-Keyboard-Mouse.Native -Version 1.0.5` |
-| NuGet | `InterceptorKeyboardMouse.SDK` | `dotnet add package InterceptorKeyboardMouse.SDK --version 1.0.0` |
-| PyPI | `interceptor-keyboard-mouse` | Commande prevue apres publication : `python -m pip install interceptor-keyboard-mouse==1.0.0` |
-| Conda | `interceptor-keyboard-mouse` | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge interceptor-keyboard-mouse` (canal TitanCSA) |
-| crates.io | `interceptor-keyboard-mouse` | `cargo add interceptor-keyboard-mouse@1.0.0` |
-| npm | [`interceptor-keyboard-mouse-sdk`](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-JavaScript-npm#readme) | `npm install interceptor-keyboard-mouse-sdk@1.0.0` |
-| GitHub | [interceptor-keyboard-mouse-sdk 1.0.1](https://github.com/TitanCSA/sdk-packages/releases/download/node-input-sdk-v1.0.1/interceptor-keyboard-mouse-sdk-1.0.1.tgz) | `npm install ./interceptor-keyboard-mouse-sdk-1.0.1.tgz` |
-| Maven Central | `io.github.titancsa:interceptor-keyboard-mouse` | `io.github.titancsa:interceptor-keyboard-mouse:1.0.0 (pom.xml / Gradle)` |
-| JitPack | `com.github.TitanCSA:Interceptor-Keyboard-Mouse` | `com.github.TitanCSA:Interceptor-Keyboard-Mouse:java-sdk-v1.0.0 (avec le depot JitPack)` |
-| Go Modules | `github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules` | `go get github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules@v1.0.0` |
-| pkg.go.dev | `github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules` | `Documentation : https://pkg.go.dev/github.com/TitanCSA/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-Go-modules@v1.0.0` |
-| PowerShell Gallery | `InterceptorKeyboardMouse` | `Install-Module InterceptorKeyboardMouse -RequiredVersion 1.0.0 -Scope CurrentUser` |
-| pub.dev | `interceptor_keyboard_mouse` | `dart pub add interceptor_keyboard_mouse:1.0.0` |
-| RubyGems | `interceptor-keyboard-mouse` | `gem install interceptor-keyboard-mouse -v 1.0.0` |
-| Packagist | `titancsa/interceptor-keyboard-mouse` | `composer require titancsa/interceptor-keyboard-mouse:1.0.0` |
+Choose a language in the [SDK and package guide](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse#readme) for exact install commands and examples. If your example requires a driver or app, install it separately.
 
-Pour vcpkg et Conan, configure d abord le registre TitanCSA avec [le guide complet](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse/README.md). Le guide explique aussi Maven/Gradle, les prerequis et le chargement des DLL. Les pilotes/applications du produit sont installes separement. Les commandes marquees prevues ne sont pas encore disponibles.
-
-Les anciens imports Go et versions JitPack gardent leurs tags. Pour les anciennes archives SDK, utilise [les liens de remplacement](https://github.com/TitanCSA/sdk-packages/blob/main/release-assets/URL-MIGRATION.json).
+JavaScript and TypeScript: [`interceptor-keyboard-mouse-sdk`](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-JavaScript-npm#readme) · `npm install interceptor-keyboard-mouse-sdk@1.0.0`
 <!-- central-sdk-packages:end -->
 
 
