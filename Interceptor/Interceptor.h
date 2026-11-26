@@ -491,6 +491,58 @@ typedef struct IC_TRIAL_STATUS {
 static_assert(sizeof(IC_TRIAL_STATUS)==64,"Trial status extension ABI");
 #endif
 
+#define IC_ERROR_LICENSE_REQUIRED 7054u
+#define IC_LICENSE_VERSION 5u
+#define IC_LICENSE_PRODUCT 2u
+#define IC_LICENSE_MAGIC 0x354C4349u
+#define IC_LICENSE_CHALLENGE_MAGIC 0x35434349u
+#define IC_LICENSE_PAYLOAD_BYTES 128u
+#define IC_LICENSE_SIGNATURE_BYTES 256u
+#define IC_LICENSE_BOOT_ONLY 1u
+#define IC_LICENSE_CHALLENGE_SECONDS 120u
+#define IOCTL_IC_LICENSE_CHALLENGE IC_IOCTL(0xA40)
+#define IOCTL_IC_LICENSE_APPLY IC_IOCTL(0xA41)
+#define IOCTL_IC_LICENSE_CLEAR IC_IOCTL(0xA42)
+#define IOCTL_IC_LICENSE_STATUS IC_IOCTL(0xA43)
+
+typedef struct IC_LICENSE_CHALLENGE {
+    uint32_t magic,size,version,product,max_seconds,flags; // max_seconds=0, flags=IC_LICENSE_BOOT_ONLY.
+    uint8_t boot_nonce[32],request_nonce[32];
+} IC_LICENSE_CHALLENGE;
+// Nonces identify this loaded image and one handshake only. No machine,
+// hardware, firmware, TPM or user identity is collected or accepted.
+typedef struct IC_LICENSE_PAYLOAD {
+    uint32_t magic;
+    uint16_t version,size;
+    uint32_t product,lease_seconds; // lease_seconds must be zero: loaded-image authorization.
+    uint64_t generation;
+    uint8_t boot_nonce[32],request_nonce[32];
+    uint8_t key_id[16],customer_id[16];
+    uint64_t reserved;
+} IC_LICENSE_PAYLOAD;
+typedef struct IC_LICENSE_LEASE {
+    IC_LICENSE_PAYLOAD payload;
+    uint8_t signature[IC_LICENSE_SIGNATURE_BYTES];
+} IC_LICENSE_LEASE;
+
+#define IC_LICENSE_DISABLED 0u
+#define IC_LICENSE_INACTIVE 1u
+#define IC_LICENSE_ACTIVE 2u
+typedef struct IC_LICENSE_STATUS {
+    uint32_t size,version,state,error;
+    uint64_t generation,issued_100ns;
+    uint8_t key_id[16],customer_id[16];
+} IC_LICENSE_STATUS;
+
+#if defined(__cplusplus)
+static_assert(sizeof(IC_LICENSE_CHALLENGE)==88,"license challenge ABI");
+static_assert(sizeof(IC_LICENSE_PAYLOAD)==128,"signed license payload ABI");
+static_assert(sizeof(IC_LICENSE_LEASE)==384,"RSA-2048 license lease ABI");
+static_assert(sizeof(IC_LICENSE_STATUS)==64,"license status ABI");
+#else
+typedef char IC_LICENSE_ABI_CHECK[(sizeof(IC_LICENSE_CHALLENGE)==88 && sizeof(IC_LICENSE_PAYLOAD)==128 && sizeof(IC_LICENSE_LEASE)==384 && sizeof(IC_LICENSE_STATUS)==64)?1:-1];
+#endif
+
 namespace Interceptor {
 #if IC_PRODUCT_HAS_KEYBOARD_MOUSE || defined(IC_SDK_INTERNAL)
 inline constexpr std::uint8_t Keyboard=IC_KEYBOARD, Mouse=IC_MOUSE, Both=IC_BOTH;
@@ -682,7 +734,44 @@ Report_Descriptor Get_Report_Descriptor(const std::string& token);
 // Read-only queries do not create capture or activate the per-boot trial.
 IC_STATUS Get_Status();
 IC_CAPABILITIES Get_Capabilities();
+
+// Enumerate Windows HID input instances, including devices currently using their original package.
+enum class Input_Driver_Mode { Windows, Manufacturer, Interceptor, Unknown };
+struct Input_Driver_Binding {
+    std::wstring instance;
+    std::wstring service;
+    std::wstring inf;
+    Input_Driver_Mode mode=Input_Driver_Mode::Unknown;
+    bool mouse=false;
+    bool original_requested=false;
+    bool has_device_filters=false;
+};
+std::vector<Input_Driver_Binding> Get_Input_Driver_Bindings();
+// Explicit administration operation. Close capture for the target before switching.
+// A return of 3010 means Windows must restart. Other nonzero values are Win32 errors.
+std::uint32_t Set_Input_Driver_Mode(const std::wstring& instance,bool use_original);
+
 IC_TRIAL_STATUS Get_Trial_Status();
+// Read-only state of the loaded edition. This query never starts capture.
+enum class Driver_Edition { Demo, Release };
+enum class Driver_Use_State { Ready, TrialExpired, ActivationRequired };
+struct Driver_Use_Status {
+    Driver_Edition edition;
+    Driver_Use_State state;
+};
+Driver_Use_Status Get_Driver_Use_Status();
+IC_LICENSE_STATUS Get_License_Status();
+// Contact the authority to authorize this loaded driver. The SDK keeps the key
+// in memory. Requires the matching driver and an interactive Windows account.
+struct Verification_Result {
+    bool activated=false;
+    DWORD error=ERROR_SUCCESS;
+    std::string reason; // Stable diagnostic code; contains no activation key.
+    std::string stage; // SDK step that completed or failed; never contains a key.
+    std::string message; // English diagnostic: failed operation and its available detail/status.
+    explicit operator bool() const noexcept {return activated && error==ERROR_SUCCESS;}
+};
+Verification_Result Verification(const std::string& licenseKey);
 // Exact token of an existing automatic capture. No capture is created here.
 Device_Details Get_Device_Details(const std::string& token);
 Device_Availability Get_Device_Availability(const std::string& token);
@@ -992,11 +1081,18 @@ inline std::wstring InstalledMapperProperty(HDEVINFO set,SP_DEVINFO_DATA& device
     RegCloseKey(key);
     return status==ERROR_SUCCESS?std::wstring(value):std::wstring{};
 }
+inline bool IsMapperPaused(const wchar_t* instance,const wchar_t* product) {
+    const auto key=std::wstring(L"SOFTWARE\\")+product+L"\\MapperModes";
+    wchar_t state[16]{};
+    DWORD size=sizeof(state);
+    return RegGetValueW(HKEY_LOCAL_MACHINE,key.c_str(),instance,RRF_RT_REG_SZ|RRF_SUBKEY_WOW6464KEY,
+        nullptr,state,&size)==ERROR_SUCCESS && !_wcsicmp(state,L"Original");
+}
 inline bool UsesInboxInputMapper(HDEVINFO set,SP_DEVINFO_DATA& device,bool mouse) {
     const auto inf=InstalledMapperProperty(set,device,L"InfPath");
     return !_wcsicmp(inf.c_str(),mouse?L"msmouse.inf":L"keyboard.inf");
 }
-inline bool IsInputPackageInf(const wchar_t* inf,bool mouse) {
+inline bool IsInputPackageInf(const wchar_t* inf,bool mouse,bool release=false) {
     DWORD size=0;
     if(!SetupGetInfInformationW(inf,INFINFO_INF_NAME_IS_ABSOLUTE,nullptr,0,&size) || !size)return false;
     std::vector<BYTE> bytes(size);
@@ -1005,21 +1101,22 @@ inline bool IsInputPackageInf(const wchar_t* inf,bool mouse) {
     SP_ORIGINAL_FILE_INFO_W original{};
     original.cbSize=sizeof(original);
     if(!SetupQueryInfOriginalFileInformationW(info,0,nullptr,&original))return false;
-    return !_wcsicmp(original.OriginalInfName,mouse?
-        L"InterceptorKeyboardMouseMouse.inf":L"InterceptorKeyboardMouseKeyboard.inf");
+    const auto* expected=release?(mouse?L"InterceptorKeyboardMouseReleaseMouse.inf":L"InterceptorKeyboardMouseReleaseKeyboard.inf"):
+        (mouse?L"InterceptorKeyboardMouseMouse.inf":L"InterceptorKeyboardMouseKeyboard.inf");
+    return !_wcsicmp(original.OriginalInfName,expected);
 }
-inline bool IsMapperPackage(HDEVINFO set,SP_DEVINFO_DATA& device,SP_DRVINFO_DATA_W& driver,bool mouse) {
+inline bool IsMapperPackage(HDEVINFO set,SP_DEVINFO_DATA& device,SP_DRVINFO_DATA_W& driver,bool mouse,bool release=false) {
     // Do not reselect an older package or the superseded filter-only candidate.
-    constexpr ULONGLONG firstMapperVersion=(1ull<<48)|(5ull<<16)|4ull;
+    const ULONGLONG firstMapperVersion=release?((1ull<<48)|(2ull<<16)|6ull):((1ull<<48)|(5ull<<16)|4ull);
     if(driver.DriverVersion<firstMapperVersion)return false;
-    if(_wcsicmp(driver.ProviderName,L"TitanCSA Keyboard Mouse"))return false;
+    if(_wcsicmp(driver.ProviderName,release?L"Interceptor Project":L"TitanCSA Keyboard Mouse"))return false;
     SP_DRVINFO_DETAIL_DATA_W detail{};
     detail.cbSize=sizeof(detail);
     if(!SetupDiGetDriverInfoDetailW(set,&device,&driver,&detail,sizeof(detail),nullptr) &&
        GetLastError()!=ERROR_INSUFFICIENT_BUFFER)return false;
     if(_wcsicmp(detail.SectionName,L"Mapper") || !detail.InfFileName[0])return false;
 
-    return IsInputPackageInf(detail.InfFileName,mouse);
+    return IsInputPackageInf(detail.InfFileName,mouse,release);
 }
 
 // Track only the FriendlyName value we add to preserve a prior driver description.

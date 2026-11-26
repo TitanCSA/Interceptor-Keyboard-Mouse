@@ -11,8 +11,8 @@ Read or change input from one keyboard or mouse, even when several are connected
 
 If another Interceptor edition is installed, follow [the removal steps](docs/INSTALLATION.md) first.
 
-1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
-2. Open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo/InterceptorExampleUI.exe).
+1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest/download/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
+2. Open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest/download/InterceptorExampleUI.exe).
 3. Press a key or move the mouse. Check that your device appears in the viewer. Click **Stop** when you finish.
 <!-- simple-start:end -->
 
@@ -29,7 +29,7 @@ If another Interceptor edition is installed, follow [the removal steps](docs/INS
 Capture, remap or block **physical keyboard and mouse input** with a
 **Microsoft-signed HID keyboard and mouse driver** and a **two-file C++17 SDK**.
 
-Demo 1.0.5.4 replaces the Windows HID function driver on supported inbox device stacks. Setup preserves manufacturer-owned HID packages. Initialization and recovery work independently of input capture, and HID requests such as feature reports pass through to Windows HIDClass.
+Demo 1.0.5.4 replaces the Windows HID function driver on compatible devices, including supported devices whose original package is supplied by the manufacturer. Initialization and recovery work independently of input capture, and HID requests such as feature reports pass through to Windows HIDClass.
 Identify each source, receive its input and forward your changes through the
 device's Windows input path. Requires **Windows 10 1709+ / Windows 11 x64**.
 
@@ -268,3 +268,29 @@ Virtual HID input crosses the tested filter and is checked by a separate Windows
 | Virtual keyboard/mouse filter paths | 6 validated runs: forwarding, mouse remapping and controlled blocking |
 
 **Vdevice benchmark status.** The original campaign recorded a controller teardown crash with demo 1.0.5.0. The signed 1.0.6.0 demo passed separate teardown tests. Commercial Vdevice qualification remains pending. [Incident and edition status](https://titancsa.github.io/TitanCSA-Benchmarks/methodology/incident-wdf-001/).
+
+## Switching the input driver for one device
+
+Setup and **Associate new devices** use the Interceptor mapper for compatible
+HID keyboard and mouse instances, including original manufacturer INF packages
+that use the Windows HID mapper. Setup records the original binding before it
+changes a manufacturer package. The original package stays in the Driver Store.
+
+The common C++ SDK exposes Get_Input_Driver_Bindings() and
+Set_Input_Driver_Mode(instance, use_original). List the devices to obtain the
+Windows HID instance ID. Close the capture session and run the switch with
+administrator rights. The result is a Windows status code. Zero means ready.
+3010 means restart Windows before resuming capture. The original mode stays
+selected until you switch that instance back to Interceptor.
+
+The installed recovery helper also supports these commands in an elevated
+PowerShell. Replace the example ID with the exact value from the first command.
+
+    .\InterceptorExample.exe --list-input-drivers
+    .\InterceptorExample.exe --input-driver-mode original 'HID\VID_XXXX&PID_YYYY\INSTANCE'
+    .\InterceptorExample.exe --input-driver-mode interceptor 'HID\VID_XXXX&PID_YYYY\INSTANCE'
+
+Find the helper in the product's Recovery\Payload directory under Program Files.
+If a physical device exposes several input instances, select each required
+instance. If an old installation lacks a verified original binding, reinstall
+the manufacturer's current driver before using the switch for that instance.

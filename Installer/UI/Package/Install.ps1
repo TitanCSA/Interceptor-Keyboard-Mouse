@@ -35,7 +35,7 @@ try {
     $bindingStarted=$true
     $code=Invoke-InterceptorSetupHelper $helper @('--install',$payload)
     if($code -notin @(0,3010)){throw ('Device association failed: '+$code)}
-    if($baseline.Devices -and (Restore-InterceptorManufacturerBindings $baseline)){$code=3010}
+    if((Enable-InterceptorManufacturerMappers $baseline $helper) -eq 3010){$code=3010}
     # Remove superseded input packages so a disconnected device cannot select
     # an older mapper or the interim filter on its next plug.
     foreach($legacy in @(Get-InterceptorPackages|Where-Object {
@@ -64,7 +64,8 @@ try {
     }elseif($bindingStarted){
         try{
             Write-Host 'Restoring Windows input bindings after the failed installation...'
-            $restore=Invoke-InterceptorSetupHelper $helper @('--restore')
+            $oemRestart=Restore-InterceptorManufacturerBindings $baseline
+            $restore=if($oemRestart){3010}else{Invoke-InterceptorSetupHelper $helper @('--restore')}
             if($restore -eq 0){
                 $remaining=Get-InterceptorSetupState $helper
                 $safeToRemove=@($remaining.devices).Count -eq 0

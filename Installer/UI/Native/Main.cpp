@@ -8,6 +8,7 @@
 #include <atomic>
 
 int InstallDriver(const wchar_t* directory,bool restore,bool onlyNew=false,const wchar_t* mouseInf=nullptr,const wchar_t* controlInf=nullptr);
+int BindInputMapper(const wchar_t*,const wchar_t*,const wchar_t*,const wchar_t*,const wchar_t*);
 int ConfigureControlDriver(const wchar_t* inf,bool remove);
 namespace {
 std::atomic<bool> quit=false;
@@ -45,6 +46,28 @@ int wmain(int argc,wchar_t** argv) {
                 <<"; restart required="<<r.reboot_required<<"; ready="<<r.ready<<"; error="<<r.error<<'\n';
             return r.error?static_cast<int>(r.error):r.ready?0:ERROR_SUCCESS_REBOOT_REQUIRED;
         }
+        if(mode==L"--list-input-drivers" && argc==2){
+            for(const auto& binding:Get_Input_Driver_Bindings()){
+                const wchar_t* label=L"Unknown";
+                switch(binding.mode){
+                case Input_Driver_Mode::Windows:label=L"Windows";break;
+                case Input_Driver_Mode::Manufacturer:label=L"Manufacturer";break;
+                case Input_Driver_Mode::Interceptor:label=L"Interceptor";break;
+                default:break;
+                }
+                std::wcout<<binding.instance<<L"\t"<<label<<L"\t"<<binding.service<<L"\t"<<binding.inf
+                    <<(binding.original_requested?L"\toriginal requested":L"")<<L'\n';
+            }
+            return 0;
+        }
+        if(mode==L"--input-driver-mode" && argc==4){
+            const std::wstring target=argv[2];
+            if(target!=L"original" && target!=L"interceptor")return ERROR_INVALID_PARAMETER;
+            const auto result=Set_Input_Driver_Mode(argv[3],target==L"original");
+            std::cout<<(result==0?"Input driver ready":result==3010?"Restart Windows to complete the input change":"Input driver change failed")<<"; Windows code "<<result<<'\n';
+            return static_cast<int>(result);
+        }
+        if(mode==L"--bind-mapper" && argc==7)return BindInputMapper(argv[2],argv[3],argv[4],argv[5],argv[6]);
         if(mode==L"--restore")return InstallDriver(nullptr,true);
         if(mode==L"--status") {
             auto s=Get_Status();

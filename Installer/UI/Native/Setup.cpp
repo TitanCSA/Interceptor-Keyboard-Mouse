@@ -150,6 +150,37 @@ bool ConfigureControl(const wchar_t* inf,bool remove) {
     std::cout<<"Root control configured; reboot="<<reboot<<'\n';return reboot;
 }
 }
+
+int BindInputMapper(const wchar_t* instance,const wchar_t* fromService,const wchar_t* fromInf,
+                    const wchar_t* destination,const wchar_t* desiredService) {
+    if(_wcsnicmp(instance,L"HID\\",4))return ERROR_INVALID_PARAMETER;
+    Devices set{SetupDiCreateDeviceInfoList(nullptr,nullptr)};
+    Check(set.value!=INVALID_HANDLE_VALUE,"Open input setup information set");
+    SP_DEVINFO_DATA device{};device.cbSize=sizeof(device);
+    Check(SetupDiOpenDeviceInfoW(set.value,instance,nullptr,0,&device),"Open input instance");
+    const bool mouse=IsEqualGUID(device.ClassGuid,GUID_DEVCLASS_MOUSE);
+    if(!mouse && !IsEqualGUID(device.ClassGuid,GUID_DEVCLASS_KEYBOARD))return ERROR_INVALID_PARAMETER;
+    const auto* stock=mouse?L"mouhid":L"kbdhid";
+    const bool intercept=!_wcsicmp(desiredService,IC_SDK_SERVICE);
+    if((intercept && _wcsicmp(fromService,stock)) ||
+       (!intercept && (_wcsicmp(fromService,IC_SDK_SERVICE) || _wcsicmp(desiredService,stock))))return ERROR_INVALID_PARAMETER;
+    const auto stillCurrent=[&]{
+        const auto service=SetupHealth::Strings(set.value,device,SPDRP_SERVICE);
+        const auto hardware=SetupHealth::Strings(set.value,device,SPDRP_HARDWAREID);
+        const auto inf=Interceptor::SetupDetail::InstalledMapperProperty(set.value,device,L"InfPath");
+        return service.size()==1 && !_wcsicmp(service.front().c_str(),fromService) &&
+            !hardware.empty() && !_wcsnicmp(hardware.front().c_str(),L"HID\\",4) &&
+            !_wcsicmp(inf.c_str(),fromInf);
+    };
+    if(!stillCurrent())return ERROR_RETRY;
+    if(intercept){
+        const auto profile=Interceptor::SetupDetail::ProbeMapperProfile(set.value,device,mouse);
+        if(!profile.supported)return ERROR_NOT_SUPPORTED;
+        if(!stillCurrent())return ERROR_RETRY;
+    }
+    return Interceptor::SetupDetail::BindInstance(set.value,device,destination)?ERROR_SUCCESS_REBOOT_REQUIRED:ERROR_SUCCESS;
+}
+
 int ConfigureControlDriver(const wchar_t* inf,bool remove) {return ConfigureControl(inf,remove)?ERROR_SUCCESS_REBOOT_REQUIRED:0;}
 int InstallDriver(const wchar_t* directory,bool restore,bool onlyNew,const wchar_t* mouseInf,const wchar_t* controlInf) {
     const GUID* classes[]={&GUID_DEVCLASS_KEYBOARD,&GUID_DEVCLASS_MOUSE};
@@ -176,6 +207,7 @@ int InstallDriver(const wchar_t* directory,bool restore,bool onlyNew,const wchar
             }
             wchar_t instance[MAX_DEVICE_ID_LEN]{};
             Check(SetupDiGetDeviceInstanceIdW(devices.value,&data,instance,MAX_DEVICE_ID_LEN,nullptr),"Read mapper instance ID");
+            if(!restore && Interceptor::SetupDetail::IsMapperPaused(instance,IC_SDK_SERVICE))continue;
             if(!seen.insert(instance).second)continue;
             std::wstring inf;
             if(onlyNew)inf=kind?mouseInf:directory;
@@ -213,7 +245,7 @@ int InstallDriver(const wchar_t* directory,bool restore,bool onlyNew,const wchar
         if(!restore && _wcsicmp(target.service.c_str(),IC_SDK_SERVICE) &&
             !Interceptor::SetupDetail::UsesInboxInputMapper(devices.value,data,target.mouse) &&
             !(target.filtered && UsesInputPackage(devices.value,data,target.mouse,windows))) {
-            std::wcout<<L"Preserved manufacturer HID driver package: "<<target.instance<<L"\n";continue;
+            std::wcout<<L"Manufacturer HID package requires a recorded original binding: "<<target.instance<<L"\n";continue;
         }
         if(!restore && !target.filtered && _wcsicmp(target.service.c_str(),IC_SDK_SERVICE)) {
             const auto profile=Interceptor::SetupDetail::ProbeMapperProfile(devices.value,data,target.mouse);
