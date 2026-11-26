@@ -16,6 +16,8 @@ If another Interceptor edition is installed, follow [the removal steps](docs/INS
 3. Press a key or move the mouse. Check that your device appears in the viewer. Click **Stop** when you finish.
 <!-- simple-start:end -->
 
+[Premier essai en français](https://titancsa.github.io/fr/tester-deux-claviers-windows/)
+
 <!-- full-version-contact:start -->
 > [!IMPORTANT]
 > **Version without the one-hour demo limit**
