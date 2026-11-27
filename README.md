@@ -3,7 +3,7 @@
 <!-- simple-start:start -->
 Read or change input from one keyboard or mouse, even when several are connected.
 
-[First steps](#first-steps) · [Develop](#sdk-and-packages) · [Maintain](https://github.com/TitanCSA/sdk-packages/blob/main/CONTRIBUTING.md)
+[Guide en français](https://titancsa.github.io/fr/tester-deux-claviers-windows/) · [SDK](#sdk-and-packages) · [Full version on Discord](https://titancsa.github.io/about/evidence/#release-contact)
 
 ## First steps
 
@@ -11,12 +11,10 @@ Read or change input from one keyboard or mouse, even when several are connected
 
 If another Interceptor edition is installed, follow [the removal steps](docs/INSTALLATION.md) first.
 
-1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest/download/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
-2. Open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/latest/download/InterceptorExampleUI.exe).
-3. Press a key or move the mouse. Check that your device appears in the viewer. Click **Stop** when you finish.
+1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo-r3/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
+2. Open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse/releases/download/v1.0.5.4-demo-r3/InterceptorExampleUI.exe).
+3. Tap a key in **Keyboard** or move the pointer in **Mouse**. Click **Observe** if needed. Check that the viewer reacts, then click **Stop**.
 <!-- simple-start:end -->
-
-[Premier essai en français](https://titancsa.github.io/fr/tester-deux-claviers-windows/)
 
 <!-- full-version-contact:start -->
 > [!IMPORTANT]
@@ -255,7 +253,7 @@ To the maximum extent permitted by applicable law, the software is provided "AS 
 
 Choose a language in the [SDK and package guide](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse#readme) for exact install commands and examples. If your example requires a driver or app, install it separately.
 
-JavaScript and TypeScript: [`interceptor-keyboard-mouse-sdk`](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Keyboard-Mouse/Interceptor-Keyboard-Mouse-JavaScript-npm#readme) · `npm install interceptor-keyboard-mouse-sdk@1.0.0`
+[First SDK check](https://titancsa.github.io/guides/keyboard-mouse-first-run/#first-sdk-check) · [Python example](https://titancsa.github.io/guides/keyboard-mouse-first-run/#python-sdk) · [Package maintenance](https://github.com/TitanCSA/sdk-packages/blob/main/CONTRIBUTING.md)
 <!-- central-sdk-packages:end -->
 
 
